@@ -11,7 +11,7 @@ import MyContext from "../utils/context";
 const client = new OAuth2Client(process.env.CLIENT_ID);
 
 @Resolver((_type) => User)
-class UsersResolver {
+class UserResolver {
   @Mutation(() => LoginOutput)
   async login(
     @Arg("LoginInputs") { token }: LoginInput,
@@ -64,10 +64,15 @@ class UsersResolver {
 
         // Send the cookie in response & return `role`
         res.cookie("token", token);
-        return { authorized: true, role: user.role };
+        return {
+          authorized: true,
+          role: user.role,
+          email: user.email,
+          name: user.name,
+        };
       }
     } catch (e) {
-      throw new Error(`messsage : ${e}`);
+      throw new Error(e);
     }
   }
 
@@ -76,6 +81,12 @@ class UsersResolver {
   getMe(@Ctx() { user }: MyContext) {
     return user;
   }
+
+  @Mutation(() => Boolean)
+  async logout(@Ctx() { res }: MyContext) {
+    res.cookie("token", "", { httpOnly: true, maxAge: 1 });
+    return true;
+  }
 }
 
-export default UsersResolver;
+export default UserResolver;

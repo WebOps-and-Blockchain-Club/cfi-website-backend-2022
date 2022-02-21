@@ -1,3 +1,3 @@
-import UsersResolver from "./Users";
+import UserResolver from "./User";
 
-export default [UsersResolver] as const;
+export default [UserResolver] as const;

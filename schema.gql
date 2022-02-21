@@ -9,11 +9,14 @@ input LoginInput {
 
 type LoginOutput {
   authorized: Boolean!
+  email: String!
+  name: String!
   role: UserRole!
 }
 
 type Mutation {
   login(LoginInputs: LoginInput!): LoginOutput!
+  logout: Boolean!
 }
 
 type Query {

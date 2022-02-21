@@ -10,6 +10,12 @@ class LoginOutput {
 
   @Field(() => UserRole)
   role: UserRole;
+
+  @Field()
+  email: string;
+
+  @Field()
+  name: string;
 }
 
 export { LoginOutput };

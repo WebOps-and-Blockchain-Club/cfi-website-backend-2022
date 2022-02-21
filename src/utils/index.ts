@@ -1,5 +1,3 @@
-import bcryptjs from "bcryptjs";
-
 export enum UserRole {
   ADMIN = "ADMIN",
   DEV = "DEV",
@@ -19,10 +17,10 @@ export const emailRoleList = [
     email: "cfiwebops@gmail.com",
     role: UserRole.MEMBER,
   },
-{
-email: "mm19b035@smail.iitm.ac.in",
-role: UserRole.USER
-}
+  {
+    email: "mm19b035@smail.iitm.ac.in",
+    role: UserRole.USER,
+  },
 ];
 
 export var salt = bcryptjs.genSaltSync(Number(process.env.ITERATIONS!));
