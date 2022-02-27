@@ -1,6 +1,8 @@
 import { UserRole } from "../utils";
-import { Field, ObjectType } from "type-graphql";
+import { Field, ObjectType, registerEnumType } from "type-graphql";
 import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+
+registerEnumType(UserRole, { name: "UserRole" });
 
 @Entity("User")
 @ObjectType("User")

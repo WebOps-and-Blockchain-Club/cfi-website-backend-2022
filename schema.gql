@@ -15,7 +15,7 @@ type LoginOutput {
 }
 
 type Mutation {
-  login(LoginInputs: LoginInput!): LoginOutput!
+  login(LoginInputs: LoginInput!): User!
   logout: Boolean!
 }
 

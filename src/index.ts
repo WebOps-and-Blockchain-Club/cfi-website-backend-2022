@@ -10,6 +10,7 @@ import jwt from "jsonwebtoken";
 import authChecker from "./utils/authcheker";
 import express from "express";
 import cors from "cors";
+var cookieParser = require("cookie-parser");
 
 import { graphqlUploadExpress } from "graphql-upload";
 import { FILE_SIZE_LIMIT_MB } from "./utils/config";
@@ -31,11 +32,13 @@ const main = async () => {
       res: express.Response;
     }) => {
       let user;
-      if (req.headers.cookie) {
-        const token = req.headers.cookie.split("token=")[1];
-        if (token) {
+      const token = req.cookies.token;
+      if (token) {
+        try {
           const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
           user = await User.findOne({ id: decoded });
+        } catch (e) {
+          console.log(e);
         }
       }
       return { req, res, user };
@@ -45,6 +48,8 @@ const main = async () => {
   await server.start();
 
   const app = express();
+
+  app.use(cookieParser());
 
   app.use(
     graphqlUploadExpress({

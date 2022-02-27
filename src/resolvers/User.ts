@@ -4,7 +4,6 @@ import { OAuth2Client } from "google-auth-library";
 
 import User from "../entities/User";
 import { LoginInput } from "../types/inputs/User";
-import { LoginOutput } from "../types/objects/User";
 import { emailRoleList, UserRole } from "../utils";
 import MyContext from "../utils/context";
 
@@ -12,7 +11,7 @@ const client = new OAuth2Client(process.env.CLIENT_ID);
 
 @Resolver((_type) => User)
 class UserResolver {
-  @Mutation(() => LoginOutput)
+  @Mutation(() => User)
   async login(
     @Arg("LoginInputs") { token }: LoginInput,
     @Ctx() { res }: MyContext
@@ -55,7 +54,7 @@ class UserResolver {
 
         // Send the cookie in response & return `role`
         res.cookie("token", token);
-        return { authorized: !!createdUser, role: createdUser.role };
+        return createdUser;
       }
 
       // If `user` exists in database
@@ -64,12 +63,7 @@ class UserResolver {
 
         // Send the cookie in response & return `role`
         res.cookie("token", token);
-        return {
-          authorized: true,
-          role: user.role,
-          email: user.email,
-          name: user.name,
-        };
+        return user;
       }
     } catch (e) {
       throw new Error(e);
