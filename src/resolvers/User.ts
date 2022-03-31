@@ -1,8 +1,18 @@
-import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql";
+import {
+  Arg,
+  Authorized,
+  Ctx,
+  FieldResolver,
+  Mutation,
+  Query,
+  Resolver,
+  Root,
+} from "type-graphql";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 
 import User from "../entities/User";
+import Blog from "../entities/Blog";
 import { LoginInput } from "../types/inputs/User";
 import { emailRoleList, UserRole } from "../utils";
 import MyContext from "../utils/context";
@@ -80,6 +90,17 @@ class UserResolver {
   async logout(@Ctx() { res }: MyContext) {
     res.cookie("token", "", { httpOnly: true, maxAge: 1 });
     return true;
+  }
+
+  @FieldResolver(() => [Blog], { nullable: true })
+  async blogs(@Root() { id, blogs }: User) {
+    try {
+      if (blogs) return blogs;
+      else
+        return (await User.findOneOrFail(id, { relations: ["blogs"] })).blogs;
+    } catch (e) {
+      throw new Error(e);
+    }
   }
 }
 

@@ -1,6 +1,13 @@
 import { UserRole } from "../utils";
 import { Field, ObjectType, registerEnumType } from "type-graphql";
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from "typeorm";
+import Blog from "./Blog";
 
 registerEnumType(UserRole, { name: "UserRole" });
 
@@ -22,6 +29,9 @@ class User extends BaseEntity {
   @Column("enum", { enum: UserRole, default: UserRole.USER })
   @Field(() => UserRole)
   role: UserRole;
+
+  @OneToMany(() => Blog, (blog) => blog.createdBy, { nullable: true })
+  blogs: Blog[];
 }
 
 export default User;

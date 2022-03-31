@@ -3,27 +3,123 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+type Blog {
+  author: String!
+  blogs: [Tag!]!
+  club: Club!
+  content: String!
+  description: String!
+  id: String!
+  readingTime: String!
+  status: BlogStatus!
+  title: String!
+  updatedAt: DateTime!
+  views: Float!
+}
+
+enum BlogStatus {
+  APPROVED
+  DRAFT
+  PENDING
+  REJECTED
+}
+
+enum Club {
+  AERO_CLUB
+  ANALYTICS_CLUB
+  CVI
+  ELECTRONICS_CLUB
+  HORIZON
+  IBOT
+  IGEM
+  PRODUCT_DESIGN_CLUB
+  PROGRAMMING_CLUB
+  TEAM_ENVISAGE
+  TEAM_SAHAAY
+  THREED_PRINTING_CLUB
+  WEBOPS_AND_BLOCKCHAIN_CLUB
+}
+
+input CreateBlogInput {
+  author: String!
+  club: Club!
+  content: String!
+  description: String!
+  readingTime: String!
+  tagIds: [String!]!
+  title: String!
+}
+
+input CreateTagInput {
+  name: String!
+}
+
+"""
+The javascript `Date` as string. Type represents date and time as the ISO Date string.
+"""
+scalar DateTime
+
+input EditBlogInput {
+  author: String
+  club: Club
+  content: String
+  description: String
+  readingTime: String
+  tagIds: [String!]
+  title: String
+}
+
+input EditTagInput {
+  name: String
+}
+
+input FilterBlog {
+  search: String
+  tagIds: [String!]
+  tagNames: [String!]
+}
+
+type GetBlogsOutput {
+  blogs: [Blog!]
+  count: Float!
+}
+
 input LoginInput {
   token: String!
 }
 
-type LoginOutput {
-  authorized: Boolean!
-  email: String!
-  name: String!
-  role: UserRole!
-}
-
 type Mutation {
+  createBlog(CreateBlogInput: CreateBlogInput!): Blog!
+  createTag(CreateTagInput: CreateTagInput!): Boolean!
+  editBlog(BlogId: String!, EditBlogInput: EditBlogInput!): Blog!
+  editTag(EditTagInput: EditTagInput!, TagId: String!): Boolean!
   login(LoginInputs: LoginInput!): User!
   logout: Boolean!
+  updateBlogStatus(BlogId: String!, BlogStatus: String!): Boolean!
+}
+
+input Pagination {
+  skip: Float!
+  take: Float!
 }
 
 type Query {
+  getBlog(BlogId: String!): Blog
+  getBlogs(Filters: FilterBlog, Pagination: Pagination): GetBlogsOutput!
   getMe: User!
+  getTag(TagId: String, TagName: String): Tag
+  getTags: [Tag!]
+  updateViews(BlogId: String!): Boolean
+}
+
+type Tag {
+  blogs(Filters: FilterBlog, Pagination: Pagination): GetBlogsOutput!
+  id: String!
+  name: String!
 }
 
 type User {
+  blogs: [Blog!]
   email: String!
   id: String!
   name: String!
