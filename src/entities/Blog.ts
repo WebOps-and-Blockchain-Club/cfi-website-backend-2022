@@ -1,4 +1,4 @@
-import { autoGenString, BlogStatus, Club } from "../utils";
+import { autoGenString, BlogStatus, ClubEnum } from "../utils";
 import { Field, ObjectType, registerEnumType } from "type-graphql";
 import {
   BaseEntity,
@@ -15,7 +15,7 @@ import User from "./User";
 import Tag from "./Tag";
 
 registerEnumType(BlogStatus, { name: "BlogStatus" });
-registerEnumType(Club, { name: "Club" });
+registerEnumType(ClubEnum, { name: "ClubEnum" });
 
 @Entity("Blog")
 @ObjectType("Blog")
@@ -57,9 +57,9 @@ class Blog extends BaseEntity {
   @Field()
   author: string;
 
-  @Column("enum", { enum: Club })
-  @Field(() => Club)
-  club: Club;
+  @Column("enum", { enum: ClubEnum })
+  @Field(() => ClubEnum)
+  club: ClubEnum;
 
   @Column("enum", { enum: BlogStatus, default: BlogStatus.DRAFT })
   @Field(() => BlogStatus)

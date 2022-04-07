@@ -12,7 +12,12 @@ export enum BlogStatus {
   REJECTED = "REJECTED",
 }
 
-export enum Club {
+export enum ProjectStatus {
+  DRAFT = "DRAFT",
+  PUBLIC = "PUBLIC",
+}
+
+export enum ClubEnum {
   THREED_PRINTING_CLUB = "3D Printing Club",
   AERO_CLUB = "Aero Club",
   ANALYTICS_CLUB = "Analytics Club",

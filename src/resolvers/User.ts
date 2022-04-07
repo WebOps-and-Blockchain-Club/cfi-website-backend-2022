@@ -16,6 +16,7 @@ import Blog from "../entities/Blog";
 import { LoginInput } from "../types/inputs/User";
 import { emailRoleList, UserRole } from "../utils";
 import MyContext from "../utils/context";
+import Project from "../entities/Project";
 
 const client = new OAuth2Client(process.env.CLIENT_ID);
 
@@ -98,6 +99,18 @@ class UserResolver {
       if (blogs) return blogs;
       else
         return (await User.findOneOrFail(id, { relations: ["blogs"] })).blogs;
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  @FieldResolver(() => [Project], { nullable: true })
+  async projects(@Root() { id, projects }: User) {
+    try {
+      if (projects) return projects;
+      else
+        return (await User.findOneOrFail(id, { relations: ["projects"] }))
+          .projects;
     } catch (e) {
       throw new Error(e);
     }

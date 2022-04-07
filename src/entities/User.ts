@@ -1,4 +1,3 @@
-import { UserRole } from "../utils";
 import { Field, ObjectType, registerEnumType } from "type-graphql";
 import {
   BaseEntity,
@@ -8,6 +7,10 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import Blog from "./Blog";
+import Project from "./Project";
+import Comment from "./Comment";
+import { UserRole } from "../utils";
+import Image from "./Image";
 
 registerEnumType(UserRole, { name: "UserRole" });
 
@@ -32,6 +35,15 @@ class User extends BaseEntity {
 
   @OneToMany(() => Blog, (blog) => blog.createdBy, { nullable: true })
   blogs: Blog[];
+
+  @OneToMany(() => Project, (project) => project.createdBy, { nullable: true })
+  projects: Project[];
+
+  @OneToMany(() => Image, (image) => image.createdBy, { nullable: true })
+  images: Image[];
+
+  @OneToMany(() => Comment, (comment) => comment.createdBy, { nullable: true })
+  comments: Comment[];
 }
 
 export default User;

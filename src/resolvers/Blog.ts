@@ -48,7 +48,7 @@ class BlogResolver {
   }
 
   @Authorized([UserRole.ADMIN, UserRole.DEV, UserRole.MEMBER])
-  @Mutation(() => Blog)
+  @Mutation(() => Boolean)
   async editBlog(
     @Arg("BlogId") id: string,
     @Arg("EditBlogInput") editBlogInput: EditBlogInput,

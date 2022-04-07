@@ -1,5 +1,5 @@
 import User from "../../entities/User";
-import { Club } from "../../utils";
+import { ClubEnum } from "../../utils";
 import { Field, InputType } from "type-graphql";
 import Tag from "../../entities/Tag";
 
@@ -20,8 +20,8 @@ class CreateBlogInput {
   @Field()
   author: string;
 
-  @Field(() => Club)
-  club: Club;
+  @Field(() => ClubEnum)
+  club: ClubEnum;
 
   @Field(() => [String])
   tagIds: String[];
@@ -47,8 +47,8 @@ class EditBlogInput {
   @Field({ nullable: true })
   author?: string;
 
-  @Field(() => Club, { nullable: true })
-  club?: Club;
+  @Field(() => ClubEnum, { nullable: true })
+  club?: ClubEnum;
 
   @Field(() => [String], { nullable: true })
   tagIds?: String[];

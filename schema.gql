@@ -6,7 +6,7 @@
 type Blog {
   author: String!
   blogs: [Tag!]!
-  club: Club!
+  club: ClubEnum!
   content: String!
   description: String!
   id: String!
@@ -24,7 +24,13 @@ enum BlogStatus {
   REJECTED
 }
 
-enum Club {
+type Club {
+  id: String!
+  name: String!
+  projects: [Project!]!
+}
+
+enum ClubEnum {
   AERO_CLUB
   ANALYTICS_CLUB
   CVI
@@ -40,13 +46,42 @@ enum Club {
   WEBOPS_AND_BLOCKCHAIN_CLUB
 }
 
+type Comment {
+  createdAt: DateTime!
+  description: String!
+  id: String!
+}
+
 input CreateBlogInput {
   author: String!
-  club: Club!
+  club: ClubEnum!
   content: String!
   description: String!
   readingTime: String!
   tagIds: [String!]!
+  title: String!
+}
+
+input CreateClubInput {
+  name: String!
+}
+
+input CreateCommentInput {
+  description: String!
+  projectId: String!
+}
+
+input CreateProjectInput {
+  clubIds: [String!]!
+  id: String
+  q1: String
+  q2: String
+  q3: String
+  q4: String
+  q5: String
+  q6: String
+  q7: String
+  status: ProjectStatus!
   title: String!
 }
 
@@ -61,7 +96,7 @@ scalar DateTime
 
 input EditBlogInput {
   author: String
-  club: Club
+  club: ClubEnum
   content: String
   description: String
   readingTime: String
@@ -79,9 +114,27 @@ input FilterBlog {
   tagNames: [String!]
 }
 
+input FilterProject {
+  clubIds: [String!]
+  clubNames: [String!]
+  search: String
+}
+
 type GetBlogsOutput {
   blogs: [Blog!]
   count: Float!
+}
+
+type GetProjectsOutput {
+  count: Float!
+  projects: [Project!]
+}
+
+type Image {
+  createdAt: DateTime!
+  id: String!
+  name: String!
+  url: String!
 }
 
 input LoginInput {
@@ -90,12 +143,16 @@ input LoginInput {
 
 type Mutation {
   createBlog(CreateBlogInput: CreateBlogInput!): Blog!
+  createClub(CreateClubInput: CreateClubInput!): Boolean!
+  createComment(CreateCommentInput: CreateCommentInput!, ProjectId: String!): Comment!
+  createProject(CreateProjectInput: CreateProjectInput!): Project!
   createTag(CreateTagInput: CreateTagInput!): Boolean!
-  editBlog(BlogId: String!, EditBlogInput: EditBlogInput!): Blog!
+  editBlog(BlogId: String!, EditBlogInput: EditBlogInput!): Boolean!
   editTag(EditTagInput: EditTagInput!, TagId: String!): Boolean!
   login(LoginInputs: LoginInput!): User!
   logout: Boolean!
   updateBlogStatus(BlogId: String!, BlogStatus: String!): Boolean!
+  uploadImage(Image: [Upload!]!): [Image!]!
 }
 
 input Pagination {
@@ -103,10 +160,36 @@ input Pagination {
   take: Float!
 }
 
+type Project {
+  clubs: [Club!]!
+  comments: [Comment!]!
+  createdBy: User!
+  id: String!
+  q1: String
+  q2: String
+  q3: String
+  q4: String
+  q5: String
+  q6: String
+  q7: String
+  status: ProjectStatus!
+  title: String!
+  updatedAt: DateTime!
+}
+
+enum ProjectStatus {
+  DRAFT
+  PUBLIC
+}
+
 type Query {
+  deleteImage(ImageName: String!): Boolean!
   getBlog(BlogId: String!): Blog
   getBlogs(Filters: FilterBlog, Pagination: Pagination): GetBlogsOutput!
+  getClubs: [Club!]!
   getMe: User!
+  getProject(ProjectId: String!): Project
+  getProjects(Filters: FilterProject, Pagination: Pagination): GetProjectsOutput!
   getTag(TagId: String, TagName: String): Tag
   getTags: [Tag!]
   updateViews(BlogId: String!): Boolean
@@ -118,11 +201,15 @@ type Tag {
   name: String!
 }
 
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
 type User {
   blogs: [Blog!]
   email: String!
   id: String!
   name: String!
+  projects: [Project!]
   role: UserRole!
 }
 
