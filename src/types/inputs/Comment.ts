@@ -8,7 +8,7 @@ class CreateCommentInput {
   description: string;
 
   @Field(() => String)
-  projectId: String;
+  projectId: string;
 
   createdBy: User;
   project: Project;

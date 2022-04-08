@@ -48,6 +48,7 @@ enum ClubEnum {
 
 type Comment {
   createdAt: DateTime!
+  createdBy: User!
   description: String!
   id: String!
 }
@@ -144,7 +145,7 @@ input LoginInput {
 type Mutation {
   createBlog(CreateBlogInput: CreateBlogInput!): Blog!
   createClub(CreateClubInput: CreateClubInput!): Boolean!
-  createComment(CreateCommentInput: CreateCommentInput!, ProjectId: String!): Comment!
+  createComment(CreateCommentInput: CreateCommentInput!): Comment!
   createProject(CreateProjectInput: CreateProjectInput!): Project!
   createTag(CreateTagInput: CreateTagInput!): Boolean!
   editBlog(BlogId: String!, EditBlogInput: EditBlogInput!): Boolean!
