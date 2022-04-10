@@ -28,7 +28,7 @@ class ClubResolver {
   @Query(() => [Club])
   async getClubs() {
     try {
-      return await Club.find();
+      return await Club.find({ order: { name: "ASC" } });
     } catch (e) {
       throw new Error(e);
     }
