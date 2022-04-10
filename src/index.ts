@@ -61,7 +61,11 @@ const main = async () => {
   app.use(
     cors({
       credentials: true,
-      origin: ["http://localhost:3000", "https://studio.apollographql.com"],
+      origin: [
+        "http://localhost:3000",
+        "https://studio.apollographql.com",
+        "https://cfi.iitm.ac.in",
+      ],
     })
   );
 
