@@ -52,18 +52,6 @@ class Project extends BaseEntity {
   @Field({ nullable: true })
   q4?: string;
 
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  q5?: string;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  q6?: string;
-
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  q7?: string;
-
   @Column("enum", { enum: ProjectStatus })
   @Field(() => ProjectStatus)
   status: ProjectStatus;

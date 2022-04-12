@@ -23,15 +23,6 @@ class CreateProjectInput {
   @Field({ nullable: true })
   q4?: string;
 
-  @Field({ nullable: true })
-  q5?: string;
-
-  @Field({ nullable: true })
-  q6?: string;
-
-  @Field({ nullable: true })
-  q7?: string;
-
   @Field(() => ProjectStatus)
   status: ProjectStatus;
 

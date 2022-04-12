@@ -46,9 +46,6 @@ class ProjectResolver {
           project.q2 = createProjectInput.q2;
           project.q3 = createProjectInput.q3;
           project.q4 = createProjectInput.q4;
-          project.q5 = createProjectInput.q5;
-          project.q6 = createProjectInput.q6;
-          project.q7 = createProjectInput.q7;
           project.clubs = createProjectInput.clubs;
           project.status = createProjectInput.status;
           const projectUpdated = await project.save();
