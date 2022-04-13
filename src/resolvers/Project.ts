@@ -143,6 +143,16 @@ class ProjectResolver {
     }
   }
 
+  @Mutation(() => Boolean)
+  async deleteAllProjects(@Arg("ProjectId") id: string) {
+    try {
+      const { affected } = await Project.delete(id);
+      return affected === 1;
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
   @FieldResolver(() => [Club])
   async clubs(@Root() { id, clubs }: Project) {
     try {

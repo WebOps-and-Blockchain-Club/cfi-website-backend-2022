@@ -31,6 +31,16 @@ class CommentResolver {
     }
   }
 
+  @Mutation(() => Boolean)
+  async deleteComment(@Arg("CommentId") id: string) {
+    try {
+      const { affected } = await Comment.delete(id);
+      return affected === 1;
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
   @FieldResolver(() => User)
   async createdBy(@Root() { id, createdBy }: Comment) {
     try {
