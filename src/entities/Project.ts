@@ -67,8 +67,12 @@ class Project extends BaseEntity {
   @OneToMany(() => Image, (image) => image.project, { nullable: true })
   images: Image[];
 
-  @ManyToOne(() => User, (user) => user.blogs)
+  @ManyToOne(() => User, (user) => user.projects)
   createdBy: User;
+
+  @ManyToMany(() => User, (user) => user.likedProjects, { nullable: true })
+  @JoinTable()
+  likedBy: User[];
 
   @OneToMany(() => Comment, (comment) => comment.project, { nullable: true })
   comments: Comment[];

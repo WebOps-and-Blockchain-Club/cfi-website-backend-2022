@@ -3,6 +3,7 @@ import {
   BaseEntity,
   Column,
   Entity,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
@@ -38,6 +39,9 @@ class User extends BaseEntity {
 
   @OneToMany(() => Project, (project) => project.createdBy, { nullable: true })
   projects: Project[];
+
+  @ManyToMany(() => Project, (project) => project.createdBy, { nullable: true })
+  likedProjects: Project[];
 
   @OneToMany(() => Image, (image) => image.createdBy, { nullable: true })
   images: Image[];

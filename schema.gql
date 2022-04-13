@@ -149,6 +149,7 @@ type Mutation {
   editTag(EditTagInput: EditTagInput!, TagId: String!): Boolean!
   login(LoginInputs: LoginInput!): User!
   logout: Boolean!
+  toggleLikeProject(ProjectId: String!): Boolean!
   updateBlogStatus(BlogId: String!, BlogStatus: String!): Boolean!
   uploadImage(Image: [Upload!]!): [Image!]!
 }
@@ -163,6 +164,8 @@ type Project {
   comments: [Comment!]!
   createdBy: User!
   id: String!
+  isLiked: Boolean!
+  likeCount: Float!
   q1: String
   q2: String
   q3: String

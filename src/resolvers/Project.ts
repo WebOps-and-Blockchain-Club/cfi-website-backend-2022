@@ -120,6 +120,29 @@ class ProjectResolver {
     }
   }
 
+  @Mutation(() => Boolean)
+  @Authorized()
+  async toggleLikeProject(
+    @Arg("ProjectId") id: string,
+    @Ctx() { user }: MyContext
+  ) {
+    try {
+      const project = await Project.findOne(id, { relations: ["likedBy"] });
+      if (project) {
+        if (project.likedBy.filter((u) => u.id === user.id).length)
+          project.likedBy = project.likedBy.filter((e) => e.id !== user.id);
+        else project.likedBy.push(user);
+
+        const projectUpdated = await project.save();
+        return !!projectUpdated;
+      } else {
+        throw new Error("Invalid event id");
+      }
+    } catch (e) {
+      throw new Error(e.message);
+    }
+  }
+
   @FieldResolver(() => [Club])
   async clubs(@Root() { id, clubs }: Project) {
     try {
@@ -144,6 +167,26 @@ class ProjectResolver {
     } catch (e) {
       throw new Error(e);
     }
+  }
+
+  @FieldResolver(() => Number)
+  async likeCount(@Root() { id, likedBy }: Project) {
+    try {
+      if (likedBy) return likedBy.length;
+      else {
+        return (await Project.findOneOrFail(id, { relations: ["likedBy"] }))
+          .likedBy.length;
+      }
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  @FieldResolver(() => Boolean)
+  async isLiked(@Root() { id, likedBy }: Project, @Ctx() { user }: MyContext) {
+    if (likedBy) return likedBy.filter((u) => u.id === user.id).length;
+    const project = await Project.findOne(id, { relations: ["likedBy"] });
+    return project?.likedBy.filter((u) => u.id === user.id).length;
   }
 
   @FieldResolver(() => [Comment])
