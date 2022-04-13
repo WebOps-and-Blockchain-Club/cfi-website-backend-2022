@@ -184,6 +184,7 @@ class ProjectResolver {
 
   @FieldResolver(() => Boolean)
   async isLiked(@Root() { id, likedBy }: Project, @Ctx() { user }: MyContext) {
+    if (!user) return false;
     if (likedBy) return likedBy.filter((u) => u.id === user.id).length;
     const project = await Project.findOne(id, { relations: ["likedBy"] });
     return project?.likedBy.filter((u) => u.id === user.id).length;
