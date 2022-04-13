@@ -31,7 +31,7 @@ class ImageResolver {
             name,
             createdBy: user,
           }).save();
-          imagesModel.concat([imageModel]);
+          imagesModel.push(imageModel);
         })
       );
       return imagesModel;
