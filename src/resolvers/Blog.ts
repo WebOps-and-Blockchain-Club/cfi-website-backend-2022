@@ -74,12 +74,19 @@ class BlogResolver {
 
       if (createBlogInput.id) {
         const blog = await Blog.findOneOrFail(createBlogInput.id, {
-          relations: ["createdBy"],
+          relations: ["createdBy", "club"],
         });
         if (
           (blog.createdBy.id === user.id &&
             [BlogStatus.DRAFT, BlogStatus.PENDING].includes(blog.status)) ||
-          [UserRole.ADMIN, UserRole.DEV, UserRole.MEMBER].includes(user.role)
+          (blog.club.email === user.email &&
+            [
+              BlogStatus.PENDING,
+              BlogStatus.APPROVED_BY_CLUB,
+              BlogStatus.REJECTED_BY_CLUB,
+              BlogStatus.REJECTED,
+            ].includes(blog.status)) ||
+          [UserRole.ADMIN, UserRole.DEV].includes(user.role)
         ) {
           blog.title = createBlogInput.title;
           blog.description = createBlogInput.description;
@@ -92,7 +99,7 @@ class BlogResolver {
           blog.tags = createBlogInput.tags;
           const blogUpdated = await blog.save();
           return blogUpdated;
-        } else throw new Error("Unauthorised");
+        } else throw new Error("Not allowed to edit");
       } else {
         createBlogInput.createdBy = user;
         const blog = await Blog.create(createBlogInput).save();
@@ -103,17 +110,32 @@ class BlogResolver {
     }
   }
 
-  @Authorized([UserRole.ADMIN])
+  @Authorized([UserRole.ADMIN, UserRole.MEMBER])
   @Mutation(() => Boolean)
   async updateBlogStatus(
     @Arg("BlogId") id: string,
-    @Arg("BlogStatus") status: BlogStatus
+    @Arg("BlogStatus") status: BlogStatus,
+    @Ctx() { user }: MyContext
   ) {
     try {
-      const { affected } = await Blog.update(id, {
-        status,
+      const blog = await Blog.findOneOrFail(id, {
+        relations: ["club"],
       });
-      return affected === 1;
+
+      if (
+        ([BlogStatus.APPROVED_BY_CLUB, BlogStatus.REJECTED_BY_CLUB].includes(
+          status
+        ) &&
+          user.role !== UserRole.MEMBER &&
+          blog.club.email !== user.email) ||
+        ([BlogStatus.APPROVED, BlogStatus.REJECTED].includes(status) &&
+          user.role !== UserRole.ADMIN)
+      )
+        throw new Error("Invalid Status");
+
+      blog.status === status;
+      const blogUpdated = await blog.save();
+      return blogUpdated;
     } catch (e) {
       throw new Error(e);
     }

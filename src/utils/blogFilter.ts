@@ -8,14 +8,30 @@ export const filterBlogWithRole = (
 ) => {
   if (user && [UserRole.ADMIN, UserRole.DEV].includes(user?.role)) {
     return blogs?.filter((blog) =>
-      [BlogStatus.PENDING, BlogStatus.APPROVED, BlogStatus.REJECTED].includes(
-        blog.status
-      )
+      [
+        BlogStatus.PENDING,
+        BlogStatus.APPROVED_BY_CLUB,
+        BlogStatus.REJECTED_BY_CLUB,
+        BlogStatus.APPROVED,
+        BlogStatus.REJECTED,
+      ].includes(blog.status)
     );
   } else if (user && UserRole.MEMBER === user.role) {
     return blogs?.filter(
       (blog) =>
-        [BlogStatus.DRAFT, BlogStatus.APPROVED].includes(blog.status) ||
+        (blog.club.email === user.email &&
+          [
+            BlogStatus.PENDING,
+            BlogStatus.APPROVED_BY_CLUB,
+            BlogStatus.REJECTED_BY_CLUB,
+            BlogStatus.APPROVED,
+          ].includes(blog.status)) ||
+        [BlogStatus.APPROVED].includes(blog.status)
+    );
+  } else if (user && UserRole.USER === user.role) {
+    return blogs?.filter(
+      (blog) =>
+        [BlogStatus.APPROVED].includes(blog.status) ||
         blog.createdBy.id === user.id
     );
   } else {

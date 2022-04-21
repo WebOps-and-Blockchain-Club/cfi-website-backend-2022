@@ -21,12 +21,15 @@ type Blog {
 
 enum BlogStatus {
   APPROVED
+  APPROVED_BY_CLUB
   DRAFT
   PENDING
   REJECTED
+  REJECTED_BY_CLUB
 }
 
 type Club {
+  email: String!
   id: String!
   name: String!
   projects: [Project!]!

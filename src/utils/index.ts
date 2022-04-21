@@ -8,6 +8,8 @@ export enum UserRole {
 export enum BlogStatus {
   DRAFT = "DRAFT",
   PENDING = "PENDING",
+  APPROVED_BY_CLUB = "APPROVED_BY_CLUB",
+  REJECTED_BY_CLUB = "REJECTED_BY_CLUB",
   APPROVED = "APPROVED",
   REJECTED = "REJECTED",
 }

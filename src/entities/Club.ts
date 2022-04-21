@@ -27,6 +27,10 @@ class Club extends BaseEntity {
   @Field()
   name: string;
 
+  @Column()
+  @Field()
+  email: string;
+
   @ManyToMany(() => Project, (projects) => projects.clubs, { nullable: true })
   projects: Project[];
 
