@@ -5,8 +5,10 @@ import {
   Column,
   Entity,
   ManyToMany,
+  OneToMany,
   PrimaryColumn,
 } from "typeorm";
+import Blog from "./Blog";
 import Project from "./Project";
 
 @Entity("Club")
@@ -27,6 +29,9 @@ class Club extends BaseEntity {
 
   @ManyToMany(() => Project, (projects) => projects.clubs, { nullable: true })
   projects: Project[];
+
+  @OneToMany(() => Blog, (blogs) => blogs.club, { nullable: true })
+  blogs: Blog[];
 }
 
 export default Club;

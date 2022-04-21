@@ -4,14 +4,16 @@
 # -----------------------------------------------
 
 type Blog {
-  author: String!
-  blogs: [Tag!]!
-  club: ClubEnum!
-  content: String!
-  description: String!
+  author: String
+  club: Club
+  content: String
+  createdBy: User!
+  description: String
   id: String!
-  readingTime: String!
+  image: Image
+  readingTime: Float
   status: BlogStatus!
+  tags: [Tag!]
   title: String!
   updatedAt: DateTime!
   views: Float!
@@ -30,22 +32,6 @@ type Club {
   projects: [Project!]!
 }
 
-enum ClubEnum {
-  AERO_CLUB
-  ANALYTICS_CLUB
-  CVI
-  ELECTRONICS_CLUB
-  HORIZON
-  IBOT
-  IGEM
-  PRODUCT_DESIGN_CLUB
-  PROGRAMMING_CLUB
-  TEAM_ENVISAGE
-  TEAM_SAHAAY
-  THREED_PRINTING_CLUB
-  WEBOPS_AND_BLOCKCHAIN_CLUB
-}
-
 type Comment {
   createdAt: DateTime!
   createdBy: User!
@@ -54,12 +40,15 @@ type Comment {
 }
 
 input CreateBlogInput {
-  author: String!
-  club: ClubEnum!
-  content: String!
-  description: String!
-  readingTime: String!
-  tagIds: [String!]!
+  author: String
+  clubId: String
+  content: String
+  description: String
+  id: String
+  imageData: Upload
+  readingTime: Float
+  status: BlogStatus!
+  tagIds: [String!]
   title: String!
 }
 
@@ -92,21 +81,13 @@ The javascript `Date` as string. Type represents date and time as the ISO Date s
 """
 scalar DateTime
 
-input EditBlogInput {
-  author: String
-  club: ClubEnum
-  content: String
-  description: String
-  readingTime: String
-  tagIds: [String!]
-  title: String
-}
-
 input EditTagInput {
   name: String
 }
 
 input FilterBlog {
+  clubId: [String!]
+  clubName: [String!]
   search: String
   tagIds: [String!]
   tagNames: [String!]
@@ -147,7 +128,6 @@ type Mutation {
   createTag(CreateTagInput: CreateTagInput!): Boolean!
   deleteAllProjects(ProjectId: String!): Boolean!
   deleteComment(CommentId: String!): Boolean!
-  editBlog(BlogId: String!, EditBlogInput: EditBlogInput!): Boolean!
   editTag(EditTagInput: EditTagInput!, TagId: String!): Boolean!
   login(LoginInputs: LoginInput!): User!
   logout: Boolean!

@@ -1,15 +1,15 @@
 import Blog from "../entities/Blog";
+import Club from "../entities/Club";
 import Tag from "../entities/Tag";
-import {
-  CreateBlogInput,
-  EditBlogInput,
-  FilterBlog,
-} from "../types/inputs/Blog";
+import Image from "../entities/Image";
+import User from "../entities/User";
+import { CreateBlogInput, FilterBlog } from "../types/inputs/Blog";
 import { Pagination } from "../types/inputs/Shared";
 import { GetBlogsOutput } from "../types/objects/Blog";
 import { BlogStatus, UserRole } from "../utils";
 import { filterBlogWithRole } from "../utils/blogFilter";
 import MyContext from "../utils/context";
+import { uploadFiles } from "../utils/uploads";
 import {
   Arg,
   Authorized,
@@ -23,81 +23,97 @@ import {
 
 @Resolver((_type) => Blog)
 class BlogResolver {
-  @Authorized([UserRole.ADMIN, UserRole.DEV, UserRole.MEMBER])
+  @Authorized()
   @Mutation(() => Blog)
   async createBlog(
     @Arg("CreateBlogInput") createBlogInput: CreateBlogInput,
     @Ctx() { user }: MyContext
   ) {
     try {
-      let tags: Tag[] = [];
-      await Promise.all(
-        createBlogInput.tagIds.map(async (id: any) => {
-          const tag = await Tag.findOne(id);
-          if (tag) tags = tags.concat([tag]);
-        })
-      );
-      createBlogInput.tags = tags;
-      createBlogInput.createdBy = user;
-
-      const blog = await Blog.create(createBlogInput).save();
-      return blog;
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-
-  @Authorized([UserRole.ADMIN, UserRole.DEV, UserRole.MEMBER])
-  @Mutation(() => Boolean)
-  async editBlog(
-    @Arg("BlogId") id: string,
-    @Arg("EditBlogInput") editBlogInput: EditBlogInput,
-    @Ctx() { user }: MyContext
-  ) {
-    try {
-      const blog = await Blog.findOneOrFail(id);
       if (
-        [UserRole.ADMIN, UserRole.DEV].includes(user.role) ||
-        blog.createdBy.id === user.id
-      ) {
-        if (editBlogInput.tagIds) {
-          let tags: Tag[] = [];
-          await Promise.all(
-            editBlogInput.tagIds.map(async (id: any) => {
-              const tag = await Tag.findOne(id);
-              if (tag) tags = tags.concat([tag]);
-            })
-          );
-          editBlogInput.tags = tags;
-        }
-        const { affected } = await Blog.update(id, editBlogInput);
-        return affected === 1;
-      } else throw new Error("Not authorised to edit this blog");
+        createBlogInput.status !== BlogStatus.DRAFT &&
+        (!createBlogInput.id ||
+          !createBlogInput.description ||
+          !createBlogInput.imageData ||
+          !createBlogInput.readingTime ||
+          !createBlogInput.content ||
+          !createBlogInput.author ||
+          !createBlogInput.clubId ||
+          !createBlogInput.tagIds)
+      )
+        throw new Error("Enter all the required fields");
+
+      if (
+        createBlogInput.status === BlogStatus.APPROVED ||
+        createBlogInput.status === BlogStatus.REJECTED
+      )
+        throw new Error("Invalid Blog Status");
+
+      if (createBlogInput.tagIds) {
+        let tags: Tag[] = [];
+        await Promise.all(
+          createBlogInput.tagIds.map(async (id: any) => {
+            const tag = await Tag.findOneOrFail(id);
+            if (tags) tags = tags.concat([tag]);
+          })
+        );
+        createBlogInput.tags = tags;
+      }
+
+      if (createBlogInput.clubId)
+        createBlogInput.club = await Club.findOneOrFail(createBlogInput.clubId);
+
+      if (createBlogInput.imageData) {
+        const name = await uploadFiles(createBlogInput.imageData);
+        const image = await Image.create({
+          name,
+          createdBy: user,
+        }).save();
+        createBlogInput.image = image;
+      }
+
+      if (createBlogInput.id) {
+        const blog = await Blog.findOneOrFail(createBlogInput.id, {
+          relations: ["createdBy"],
+        });
+        if (
+          (blog.createdBy.id === user.id &&
+            [BlogStatus.DRAFT, BlogStatus.PENDING].includes(blog.status)) ||
+          [UserRole.ADMIN, UserRole.DEV, UserRole.MEMBER].includes(user.role)
+        ) {
+          blog.title = createBlogInput.title;
+          blog.description = createBlogInput.description;
+          blog.image = createBlogInput.image;
+          blog.readingTime = createBlogInput.readingTime;
+          blog.content = createBlogInput.content;
+          blog.author = createBlogInput.author;
+          blog.club = createBlogInput.club;
+          blog.status = createBlogInput.status;
+          blog.tags = createBlogInput.tags;
+          const blogUpdated = await blog.save();
+          return blogUpdated;
+        } else throw new Error("Unauthorised");
+      } else {
+        createBlogInput.createdBy = user;
+        const blog = await Blog.create(createBlogInput).save();
+        return blog;
+      }
     } catch (e) {
       throw new Error(e);
     }
   }
 
-  @Authorized([UserRole.ADMIN, UserRole.MEMBER])
+  @Authorized([UserRole.ADMIN])
   @Mutation(() => Boolean)
   async updateBlogStatus(
     @Arg("BlogId") id: string,
-    @Ctx() { user }: MyContext,
     @Arg("BlogStatus") status: BlogStatus
   ) {
     try {
-      const blog = await Blog.findOneOrFail(id);
-      if (blog.createdBy.id === user.id) {
-        const { affected } = await Blog.update(id, {
-          status: BlogStatus.PENDING,
-        });
-        return affected === 1;
-      } else if (user.role === UserRole.ADMIN) {
-        const { affected } = await Blog.update(id, {
-          status,
-        });
-        return affected === 1;
-      } else throw new Error("Not authorised to update this blog status");
+      const { affected } = await Blog.update(id, {
+        status,
+      });
+      return affected === 1;
     } catch (e) {
       throw new Error(e);
     }
@@ -111,7 +127,7 @@ class BlogResolver {
   ) {
     try {
       let blogs = await Blog.find({
-        relations: ["tags"],
+        relations: ["tags", "club"],
         order: { updatedAt: "DESC" },
       });
 
@@ -119,14 +135,22 @@ class BlogResolver {
 
       if (filters) {
         if (filters.search) {
-          blogs = blogs.filter(
-            (blog) =>
-              blog.title
-                .toLowerCase()
-                .includes(filters.search?.toLowerCase()!) ||
-              blog.description
-                .toLowerCase()
-                .includes(filters.search?.toLowerCase()!)
+          blogs = blogs.filter((blog) =>
+            JSON.stringify(blog)
+              .toLowerCase()
+              .includes(filters.search?.toLowerCase()!)
+          );
+        }
+
+        if (filters.clubId) {
+          blogs = blogs.filter((blog) =>
+            filters.clubId?.includes(blog.club.id)
+          );
+        }
+
+        if (filters.clubName) {
+          blogs = blogs.filter((blog) =>
+            filters.clubName?.includes(blog.club.name)
           );
         }
 
@@ -179,11 +203,43 @@ class BlogResolver {
     }
   }
 
-  @FieldResolver(() => [Tag])
-  async blogs(@Root() { id, tags }: Blog) {
+  @FieldResolver(() => Image, { nullable: true })
+  async image(@Root() { id, image }: Blog) {
+    try {
+      if (image) return image;
+      else return (await Blog.findOne(id, { relations: ["image"] }))?.image;
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  @FieldResolver(() => Club, { nullable: true })
+  async club(@Root() { id, club }: Blog) {
+    try {
+      if (club) return club;
+      else return (await Blog.findOne(id, { relations: ["club"] }))?.club;
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  @FieldResolver(() => [Tag], { nullable: true })
+  async tags(@Root() { id, tags }: Blog) {
     try {
       if (tags) return tags;
       else return (await Blog.findOne(id, { relations: ["tags"] }))?.tags;
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  @FieldResolver(() => User)
+  async createdBy(@Root() { id, createdBy }: Blog) {
+    try {
+      if (createdBy) return createdBy;
+      else
+        return (await Blog.findOne(id, { relations: ["createdBy"] }))
+          ?.createdBy;
     } catch (e) {
       throw new Error(e);
     }

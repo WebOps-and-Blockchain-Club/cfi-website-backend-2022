@@ -1,59 +1,47 @@
-import User from "../../entities/User";
-import { ClubEnum } from "../../utils";
 import { Field, InputType } from "type-graphql";
+import { GraphQLUpload, Upload } from "graphql-upload";
+import User from "../../entities/User";
 import Tag from "../../entities/Tag";
+import Club from "../../entities/Club";
+import Image from "../../entities/Image";
+import { BlogStatus } from "../../utils";
 
 @InputType()
 class CreateBlogInput {
+  @Field({ nullable: true })
+  id?: string;
+
   @Field()
   title: string;
 
-  @Field()
+  @Field({ nullable: true })
   description: string;
 
-  @Field()
-  readingTime: string;
+  @Field(() => GraphQLUpload, { nullable: true })
+  imageData: Upload;
 
-  @Field()
+  @Field({ nullable: true })
+  readingTime: number;
+
+  @Field({ nullable: true })
   content: string;
 
-  @Field()
+  @Field({ nullable: true })
   author: string;
 
-  @Field(() => ClubEnum)
-  club: ClubEnum;
-
-  @Field(() => [String])
-  tagIds: String[];
-
-  createdBy: User;
-  tags: Tag[];
-}
-
-@InputType()
-class EditBlogInput {
-  @Field({ nullable: true })
-  title?: string;
+  @Field(() => BlogStatus)
+  status: BlogStatus;
 
   @Field({ nullable: true })
-  description?: string;
-
-  @Field({ nullable: true })
-  readingTime?: string;
-
-  @Field({ nullable: true })
-  content?: string;
-
-  @Field({ nullable: true })
-  author?: string;
-
-  @Field(() => ClubEnum, { nullable: true })
-  club?: ClubEnum;
+  clubId: string;
 
   @Field(() => [String], { nullable: true })
-  tagIds?: String[];
+  tagIds: String[];
 
-  tags?: Tag[];
+  club: Club;
+  tags: Tag[];
+  image: Image;
+  createdBy: User;
 }
 
 @InputType()
@@ -62,10 +50,16 @@ class FilterBlog {
   search?: string;
 
   @Field(() => [String], { nullable: true })
+  clubId?: string[];
+
+  @Field(() => [String], { nullable: true })
+  clubName?: string[];
+
+  @Field(() => [String], { nullable: true })
   tagIds?: string[];
 
   @Field(() => [String], { nullable: true })
   tagNames?: string[];
 }
 
-export { CreateBlogInput, EditBlogInput, FilterBlog };
+export { CreateBlogInput, FilterBlog };

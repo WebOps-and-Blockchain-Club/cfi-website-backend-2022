@@ -6,11 +6,13 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
 import Project from "./Project";
 import User from "./User";
 import { deleteFile } from "../utils/uploads";
+import Blog from "./Blog";
 
 @Entity("Image")
 @ObjectType("Image")
@@ -34,6 +36,9 @@ class Image extends BaseEntity {
 
   @ManyToOne(() => Project, (project) => project.images, { nullable: true })
   project: Project;
+
+  @OneToOne(() => Blog, (blog) => blog.image, { nullable: true })
+  blog: Blog;
 
   @ManyToOne(() => User, (user) => user.images)
   createdBy: User;
