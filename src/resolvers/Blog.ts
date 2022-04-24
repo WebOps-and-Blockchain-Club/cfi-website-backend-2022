@@ -10,6 +10,7 @@ import { BlogStatus, UserRole } from "../utils";
 import { filterBlogWithRole } from "../utils/blogFilter";
 import MyContext from "../utils/context";
 import { uploadFiles } from "../utils/uploads";
+import { mail } from "../utils/mail";
 import {
   Arg,
   Authorized,
@@ -78,7 +79,12 @@ class BlogResolver {
         });
         if (
           (blog.createdBy.id === user.id &&
-            [BlogStatus.DRAFT, BlogStatus.PENDING].includes(blog.status)) ||
+            [
+              BlogStatus.DRAFT,
+              BlogStatus.PENDING,
+              BlogStatus.REJECTED_BY_CLUB,
+              BlogStatus.REJECTED,
+            ].includes(blog.status)) ||
           (blog.club.email === user.email &&
             [
               BlogStatus.PENDING,
@@ -86,7 +92,7 @@ class BlogResolver {
               BlogStatus.REJECTED_BY_CLUB,
               BlogStatus.REJECTED,
             ].includes(blog.status)) ||
-          [UserRole.ADMIN, UserRole.DEV].includes(user.role)
+          [UserRole.ADMIN].includes(user.role)
         ) {
           blog.title = createBlogInput.title;
           blog.description = createBlogInput.description;
@@ -98,6 +104,29 @@ class BlogResolver {
           blog.status = createBlogInput.status;
           blog.tags = createBlogInput.tags;
           const blogUpdated = await blog.save();
+
+          if (
+            !!blogUpdated &&
+            blogUpdated.status === BlogStatus.PENDING &&
+            user.role === UserRole.USER
+          )
+            process.env.NODE_ENV === "production"
+              ? mail({
+                  toEmail: [
+                    blogUpdated.club.email,
+                    "cfi@smail.iitm.ac.in",
+                    "bnecfi@gmail.com",
+                  ],
+                  subject: `New Blog Created || ${blogUpdated.title}`,
+                  htmlContent: `New Blog is been created with title - ${blogUpdated.title} by ${blogUpdated.createdBy.name} with reference to ${blogUpdated.club.name}.`,
+                })
+              : console.log(
+                  blogUpdated.club.email,
+                  blogUpdated.title,
+                  blogUpdated.createdBy.name,
+                  blogUpdated.club.name
+                );
+
           return blogUpdated;
         } else throw new Error("Not allowed to edit");
       } else {
@@ -119,7 +148,7 @@ class BlogResolver {
   ) {
     try {
       const blog = await Blog.findOneOrFail(id, {
-        relations: ["club"],
+        relations: ["club", "createdBy"],
       });
 
       if (
@@ -133,9 +162,61 @@ class BlogResolver {
       )
         throw new Error("Invalid Status");
 
-      blog.status === status;
+      blog.status = status;
       const blogUpdated = await blog.save();
-      return blogUpdated;
+
+      if (!!blogUpdated)
+        process.env.NODE_ENV === "production"
+          ? mail({
+              toEmail: [
+                blogUpdated.createdBy.email,
+                "cfi@smail.iitm.ac.in",
+                "bnecfi@gmail.com",
+              ],
+              subject: `${blogUpdated.title} || Blog Status Updated to ${blogUpdated.status}`,
+              htmlContent: `New Blog with title - ${blogUpdated.title} by ${blogUpdated.createdBy.name} with reference to ${blogUpdated.club.name}, status changed to ${blogUpdated.status}.`,
+            })
+          : console.log(
+              blogUpdated.status,
+              blogUpdated.title,
+              blogUpdated.createdBy.name,
+              blogUpdated.createdBy.email,
+              blogUpdated.club.name
+            );
+
+      return !!blogUpdated;
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  @Authorized([UserRole.ADMIN, UserRole.MEMBER])
+  @Mutation(() => Boolean)
+  async suggestEdit(
+    @Arg("BlogId") id: string,
+    @Arg("Content") content: string
+  ) {
+    try {
+      const blog = await Blog.findOneOrFail(id, {
+        relations: ["createdBy", "club"],
+      });
+
+      process.env.NODE_ENV === "production"
+        ? mail({
+            toEmail: [blog.createdBy.email],
+            ccEmail: blog.club.email,
+            replyToEmail: blog.club.email,
+            subject: `${blog.title} || Blog Suggestions`,
+            htmlContent: content,
+          })
+        : console.log(
+            blog.title,
+            blog.createdBy.name,
+            blog.club.email,
+            content
+          );
+
+      return true;
     } catch (e) {
       throw new Error(e);
     }
@@ -149,7 +230,7 @@ class BlogResolver {
   ) {
     try {
       let blogs = await Blog.find({
-        relations: ["tags", "club"],
+        relations: ["tags", "club", "createdBy"],
         order: { updatedAt: "DESC" },
       });
 
@@ -203,7 +284,9 @@ class BlogResolver {
   @Query(() => Blog, { nullable: true })
   async getBlog(@Arg("BlogId") id: string, @Ctx() { user }: MyContext) {
     try {
-      const blog = await Blog.findOneOrFail(id);
+      const blog = await Blog.findOneOrFail(id, {
+        relations: ["tags", "club", "createdBy"],
+      });
       const filteredBlog = filterBlogWithRole([blog], user);
       if (!filteredBlog) throw new Error("Not authorised to view this blog");
       else return filteredBlog[0];
@@ -269,3 +352,12 @@ class BlogResolver {
 }
 
 export default BlogResolver;
+
+// TODO:
+/*
+1. Add Another role --> Done
+2. Filter blogs based on role & club --> Done
+3. Modify blog approve mutation
+4. Suggest Edit Mutation & send mail
+5. OnSubmit -> send a notification mail to respective club, cfi, bne
+*/

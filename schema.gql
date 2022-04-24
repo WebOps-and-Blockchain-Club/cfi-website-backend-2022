@@ -134,6 +134,7 @@ type Mutation {
   editTag(EditTagInput: EditTagInput!, TagId: String!): Boolean!
   login(LoginInputs: LoginInput!): User!
   logout: Boolean!
+  suggestEdit(BlogId: String!, Content: String!): Boolean!
   toggleLikeProject(ProjectId: String!): Boolean!
   updateBlogStatus(BlogId: String!, BlogStatus: String!): Boolean!
   uploadImage(Image: [Upload!]!): [Image!]!
