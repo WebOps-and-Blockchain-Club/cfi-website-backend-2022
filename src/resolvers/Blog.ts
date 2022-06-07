@@ -301,14 +301,15 @@ class BlogResolver {
     }
   }
 
-  @Query(() => Boolean, { nullable: true })
+  @Mutation(() => Boolean, { nullable: true })
   async updateViews(@Arg("BlogId") id: string) {
     try {
       const blog = await Blog.findOneOrFail(id, {
         where: { status: BlogStatus.APPROVED },
       });
-      blog.updateViews();
-      return true;
+      blog.views += 1;
+      const blogUpdated = blog.save();
+      return !!blogUpdated;
     } catch (e) {
       throw new Error(e);
     }

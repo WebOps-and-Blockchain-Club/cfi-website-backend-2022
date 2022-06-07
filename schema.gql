@@ -49,6 +49,7 @@ input CreateBlogInput {
   description: String
   id: String
   imageData: Upload
+  imageUrl: String
   readingTime: Float
   status: BlogStatus!
   tagIds: [String!]
@@ -137,6 +138,7 @@ type Mutation {
   suggestEdit(BlogId: String!, Content: String!): Boolean!
   toggleLikeProject(ProjectId: String!): Boolean!
   updateBlogStatus(BlogId: String!, BlogStatus: String!): Boolean!
+  updateViews(BlogId: String!): Boolean
   uploadImage(Image: [Upload!]!): [Image!]!
 }
 
@@ -176,7 +178,6 @@ type Query {
   getProjects(Filters: FilterProject, Pagination: Pagination): GetProjectsOutput!
   getTag(TagId: String, TagName: String): Tag
   getTags: [Tag!]
-  updateViews(BlogId: String!): Boolean
 }
 
 type Tag {

@@ -26,11 +26,7 @@ class Blog extends BaseEntity {
   @BeforeInsert()
   async setId() {
     this.id =
-      this.title.replace(" ", "-").toLowerCase() + "-" + autoGenString(12);
-  }
-
-  updateViews() {
-    this.views = this.views + 1;
+      this.title.split(" ").join("-").toLowerCase() + "-" + autoGenString(12);
   }
 
   @PrimaryColumn()
