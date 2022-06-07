@@ -9,7 +9,7 @@ import { GetBlogsOutput } from "../types/objects/Blog";
 import { BlogStatus, UserRole } from "../utils";
 import { filterBlogWithRole } from "../utils/blogFilter";
 import MyContext from "../utils/context";
-import { uploadFiles } from "../utils/uploads";
+import { deleteFile, uploadFiles } from "../utils/uploads";
 import { mail } from "../utils/mail";
 import {
   Arg,
@@ -32,10 +32,10 @@ class BlogResolver {
   ) {
     try {
       if (
-        createBlogInput.status !== BlogStatus.DRAFT &&
-        (!createBlogInput.id ||
+        createBlogInput.status === BlogStatus.PENDING &&
+        (!createBlogInput.title ||
           !createBlogInput.description ||
-          !createBlogInput.imageData ||
+          (!createBlogInput.imageData && !createBlogInput.imageUrl) ||
           !createBlogInput.readingTime ||
           !createBlogInput.content ||
           !createBlogInput.author ||
@@ -45,6 +45,8 @@ class BlogResolver {
         throw new Error("Enter all the required fields");
 
       if (
+        createBlogInput.status === BlogStatus.APPROVED_BY_CLUB ||
+        createBlogInput.status === BlogStatus.REJECTED_BY_CLUB ||
         createBlogInput.status === BlogStatus.APPROVED ||
         createBlogInput.status === BlogStatus.REJECTED
       )
@@ -63,6 +65,10 @@ class BlogResolver {
 
       if (createBlogInput.clubId)
         createBlogInput.club = await Club.findOneOrFail(createBlogInput.clubId);
+
+      if (createBlogInput.imageData && createBlogInput.imageUrl) {
+        deleteFile(createBlogInput.imageUrl.split("/").pop()!);
+      }
 
       if (createBlogInput.imageData) {
         const name = await uploadFiles(createBlogInput.imageData);

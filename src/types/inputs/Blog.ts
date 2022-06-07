@@ -21,6 +21,9 @@ class CreateBlogInput {
   imageData: Upload;
 
   @Field({ nullable: true })
+  imageUrl: string;
+
+  @Field({ nullable: true })
   readingTime: number;
 
   @Field({ nullable: true })
