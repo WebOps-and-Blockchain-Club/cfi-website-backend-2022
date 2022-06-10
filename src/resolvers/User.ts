@@ -17,6 +17,7 @@ import { LoginInput } from "../types/inputs/User";
 import { emailRoleList, UserRole } from "../utils";
 import MyContext from "../utils/context";
 import Project from "../entities/Project";
+import Club from "../entities/Club";
 
 const client = new OAuth2Client(process.env.CLIENT_ID);
 
@@ -44,12 +45,17 @@ class UserResolver {
       if (!user) {
         // Assigning `role`
         let role;
+        console.log(emailRoleList);
         const emailList = emailRoleList.filter(
           (item) => item.email === email
         )[0];
 
-        // For `ADMIN`, `MEMBER`, `DEV`
+        const clubs = await Club.find({ where: { email } });
+
+        // For `ADMIN`, `DEV`
         if (emailList) role = emailList.role;
+        // For `MEMBER`
+        else if (clubs.length) role = UserRole.MEMBER;
         // For smail, `USER`
         else if (email.includes("@smail.iitm.ac.in")) role = UserRole.USER;
         else throw new Error("Invalid User");

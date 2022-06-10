@@ -6,7 +6,7 @@ import User from "../entities/User";
 import { CreateBlogInput, FilterBlog } from "../types/inputs/Blog";
 import { Pagination } from "../types/inputs/Shared";
 import { GetBlogsOutput } from "../types/objects/Blog";
-import { BlogStatus, UserRole } from "../utils";
+import { BlogStatus, getAdminMails, UserRole } from "../utils";
 import { filterBlogWithRole } from "../utils/blogFilter";
 import MyContext from "../utils/context";
 import { deleteFile, uploadFiles } from "../utils/uploads";
@@ -118,11 +118,7 @@ class BlogResolver {
           )
             process.env.NODE_ENV === "production"
               ? mail({
-                  toEmail: [
-                    blogUpdated.club.email,
-                    "cfi@smail.iitm.ac.in",
-                    "bnecfi@gmail.com",
-                  ],
+                  toEmail: [blogUpdated.club.email, ...getAdminMails()],
                   subject: `New Blog Created || ${blogUpdated.title}`,
                   htmlContent: `New Blog is been created with title - ${blogUpdated.title} by ${blogUpdated.createdBy.name} with reference to ${blogUpdated.club.name}.`,
                 })
@@ -174,11 +170,7 @@ class BlogResolver {
       if (!!blogUpdated)
         process.env.NODE_ENV === "production"
           ? mail({
-              toEmail: [
-                blogUpdated.createdBy.email,
-                "cfi@smail.iitm.ac.in",
-                "bnecfi@gmail.com",
-              ],
+              toEmail: [blogUpdated.createdBy.email, ...getAdminMails()],
               subject: `${blogUpdated.title} || Blog Status Updated to ${blogUpdated.status}`,
               htmlContent: `New Blog with title - ${blogUpdated.title} by ${blogUpdated.createdBy.name} with reference to ${blogUpdated.club.name}, status changed to ${blogUpdated.status}.`,
             })
@@ -363,12 +355,3 @@ class BlogResolver {
 }
 
 export default BlogResolver;
-
-// TODO:
-/*
-1. Add Another role --> Done
-2. Filter blogs based on role & club --> Done
-3. Modify blog approve mutation
-4. Suggest Edit Mutation & send mail
-5. OnSubmit -> send a notification mail to respective club, cfi, bne
-*/
