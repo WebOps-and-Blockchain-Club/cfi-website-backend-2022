@@ -25,7 +25,7 @@ class Project extends BaseEntity {
   @BeforeInsert()
   setId() {
     this.id =
-      this.title.replace(" ", "-").toLowerCase() + "-" + autoGenString(12);
+      this.title.split(" ").join("-").toLowerCase() + "-" + autoGenString(12);
   }
 
   @PrimaryColumn()

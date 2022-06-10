@@ -16,7 +16,7 @@ import Project from "./Project";
 class Club extends BaseEntity {
   @BeforeInsert()
   setId() {
-    this.id = this.name.replace(" ", "-").toLowerCase();
+    this.id = this.name.split(" ").join("-").toLowerCase();
   }
 
   @PrimaryColumn()

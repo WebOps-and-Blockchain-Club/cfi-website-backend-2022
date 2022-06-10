@@ -17,16 +17,21 @@ export const filterBlogWithRole = (
       ].includes(blog.status)
     );
   } else if (user && UserRole.MEMBER === user.role) {
-    return blogs?.filter(
-      (blog) =>
-        (blog.club.email === user.email &&
-          [
-            BlogStatus.PENDING,
-            BlogStatus.APPROVED_BY_CLUB,
-            BlogStatus.REJECTED_BY_CLUB,
-            BlogStatus.APPROVED,
-          ].includes(blog.status)) ||
-        [BlogStatus.APPROVED].includes(blog.status)
+    return blogs?.filter((blog) =>
+      // (blog.club.email === user.email &&
+      //   [
+      //     BlogStatus.PENDING,
+      //     BlogStatus.APPROVED_BY_CLUB,
+      //     BlogStatus.REJECTED_BY_CLUB,
+      //     BlogStatus.APPROVED,
+      //   ].includes(blog.status)) ||
+      // [BlogStatus.APPROVED].includes(blog.status)
+      [
+        BlogStatus.PENDING,
+        BlogStatus.APPROVED_BY_CLUB,
+        BlogStatus.REJECTED_BY_CLUB,
+        BlogStatus.APPROVED,
+      ].includes(blog.status)
     );
   } else if (user && UserRole.USER === user.role) {
     return blogs?.filter(

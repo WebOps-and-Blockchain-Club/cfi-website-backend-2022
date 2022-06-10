@@ -264,14 +264,18 @@ class BlogResolver {
         }
 
         if (filters.tagIds) {
-          blogs = blogs.filter((blog) =>
-            blog.tags.filter((tag) => filters.tagIds?.includes(tag.id))
+          blogs = blogs.filter(
+            (blog) =>
+              blog.tags.filter((tag) => filters.tagIds?.includes(tag.id))
+                .length !== 0
           );
         }
 
         if (filters.tagNames) {
-          blogs = blogs.filter((blog) =>
-            blog.tags.filter((tag) => filters.tagNames?.includes(tag.name))
+          blogs = blogs.filter(
+            (blog) =>
+              blog.tags.filter((tag) => filters.tagNames?.includes(tag.name))
+                .length !== 0
           );
         }
       }
