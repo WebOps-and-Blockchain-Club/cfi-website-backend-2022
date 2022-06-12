@@ -14,7 +14,7 @@ import { OAuth2Client } from "google-auth-library";
 import User from "../entities/User";
 import Blog from "../entities/Blog";
 import { LoginInput } from "../types/inputs/User";
-import { emailRoleList, UserRole } from "../utils";
+import { emailRoleList, LoginType, RoleConstraints, UserRole } from "../utils";
 import MyContext from "../utils/context";
 import Project from "../entities/Project";
 import Club from "../entities/Club";
@@ -25,7 +25,7 @@ const client = new OAuth2Client(process.env.CLIENT_ID);
 class UserResolver {
   @Mutation(() => User)
   async login(
-    @Arg("LoginInputs") { token }: LoginInput,
+    @Arg("LoginInputs") { token, loginType }: LoginInput,
     @Ctx() { res }: MyContext
   ) {
     try {
@@ -39,9 +39,9 @@ class UserResolver {
       if (!name || !email) throw new Error("Google Login Falid");
 
       // Get the `user` details from database
-      const user = await User.findOne({ email });
+      let user = await User.findOne({ email });
 
-      // If `user` doesn't exists in database
+      // `user` doesn't exists in database -> create `user` in database
       if (!user) {
         // Assigning `role`
         let role;
@@ -61,27 +61,35 @@ class UserResolver {
         else throw new Error("Invalid User");
 
         // Store in database
-        const createdUser = await User.create({
+        user = await User.create({
           name,
           email,
           role,
         }).save();
-
-        const token = jwt.sign(createdUser.id, process.env.JWT_SECRET!);
-
-        // Send the cookie in response & return `role`
-        res.cookie("token", token);
-        return createdUser;
       }
 
-      // If `user` exists in database
-      else {
-        const token = jwt.sign(user.id, process.env.JWT_SECRET!);
+      //Check role based on loginType
+      if (
+        loginType === LoginType.SIP &&
+        !RoleConstraints.SIP.includes(user.role)
+      )
+        throw new Error("Invalid User");
+      if (
+        loginType === LoginType.BLOG &&
+        !RoleConstraints.Blog.includes(user.role)
+      )
+        throw new Error("Invalid User");
+      if (
+        loginType === LoginType.ADMIN &&
+        !RoleConstraints.Admin.includes(user.role)
+      )
+        throw new Error("Invalid User");
 
-        // Send the cookie in response & return `role`
-        res.cookie("token", token);
-        return user;
-      }
+      const jwtToken = jwt.sign(user.id, process.env.JWT_SECRET!);
+
+      // Send the cookie in response & return `role`
+      res.cookie("token", jwtToken);
+      return user;
     } catch (e) {
       throw new Error(e);
     }
@@ -95,6 +103,7 @@ class UserResolver {
 
   @Mutation(() => Boolean)
   async logout(@Ctx() { res }: MyContext) {
+    console.log("logout called");
     res.cookie("token", "", { httpOnly: true, maxAge: 1 });
     return true;
   }

@@ -8,6 +8,18 @@ export enum UserRole {
   USER = "USER",
 }
 
+export enum LoginType {
+  SIP = "SIP",
+  BLOG = "BLOG",
+  ADMIN = "ADMIN",
+}
+
+export const RoleConstraints = {
+  SIP: [UserRole.USER],
+  Blog: [UserRole.USER],
+  Admin: [UserRole.ADMIN, UserRole.DEV, UserRole.MEMBER],
+};
+
 export enum BlogStatus {
   DRAFT = "DRAFT",
   PENDING = "PENDING",

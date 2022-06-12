@@ -122,7 +122,14 @@ type Image {
 }
 
 input LoginInput {
+  loginType: LoginType!
   token: String!
+}
+
+enum LoginType {
+  ADMIN
+  BLOG
+  SIP
 }
 
 type Mutation {
