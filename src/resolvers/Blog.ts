@@ -6,7 +6,7 @@ import User from "../entities/User";
 import { CreateBlogInput, FilterBlog } from "../types/inputs/Blog";
 import { Pagination } from "../types/inputs/Shared";
 import { GetBlogsOutput } from "../types/objects/Blog";
-import { BlogStatus, getAdminMails, UserRole } from "../utils";
+import { BlogStatus, getAdminMails, RoleConstraints, UserRole } from "../utils";
 import { filterBlogWithRole } from "../utils/blogFilter";
 import MyContext from "../utils/context";
 import { deleteFile, uploadFiles } from "../utils/uploads";
@@ -52,6 +52,9 @@ class BlogResolver {
       )
         throw new Error("Invalid Blog Status");
 
+      if (RoleConstraints.Admin.includes(user.role))
+        createBlogInput.status = BlogStatus.PENDING;
+
       if (createBlogInput.tagIds) {
         let tags: Tag[] = [];
         await Promise.all(
@@ -87,14 +90,12 @@ class BlogResolver {
           (blog.createdBy.id === user.id &&
             [
               BlogStatus.DRAFT,
-              BlogStatus.PENDING,
               BlogStatus.REJECTED_BY_CLUB,
               BlogStatus.REJECTED,
             ].includes(blog.status)) ||
           (blog.club.email === user.email &&
             [
               BlogStatus.PENDING,
-              BlogStatus.APPROVED_BY_CLUB,
               BlogStatus.REJECTED_BY_CLUB,
               BlogStatus.REJECTED,
             ].includes(blog.status)) ||
@@ -154,13 +155,28 @@ class BlogResolver {
       });
 
       if (
-        ([BlogStatus.APPROVED_BY_CLUB, BlogStatus.REJECTED_BY_CLUB].includes(
-          status
-        ) &&
-          user.role !== UserRole.MEMBER &&
-          blog.club.email !== user.email) ||
-        ([BlogStatus.APPROVED, BlogStatus.REJECTED].includes(status) &&
-          user.role !== UserRole.ADMIN)
+        /**
+         * Status Validation for `MEMBER` role
+         * 3 Conditions:
+         * 1. Accepts 2 status: `APPROVED_BY_CLUB` or `REJECTED_BY_CLUB`
+         * 2. Status update should be done only for `PENDING` blog
+         * 3. It should be done by respective club
+         */
+        (user.role === UserRole.MEMBER &&
+          (![BlogStatus.APPROVED_BY_CLUB, BlogStatus.REJECTED_BY_CLUB].includes(
+            status
+          ) ||
+            blog.status !== BlogStatus.PENDING ||
+            blog.club.email !== user.email)) ||
+        /**
+         * Status Validation for `ADMIN` role
+         * 2 Conditions:
+         * 1. Accepts 2 status: `APPROVED` or `REJECTED`
+         * 2. Status update should be done only for `APPROVED_BY_CLUB` blog
+         */
+        (user.role === UserRole.ADMIN &&
+          (![BlogStatus.APPROVED, BlogStatus.REJECTED].includes(status) ||
+            blog.status !== BlogStatus.APPROVED_BY_CLUB))
       )
         throw new Error("Invalid Status");
 

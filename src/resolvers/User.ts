@@ -103,7 +103,6 @@ class UserResolver {
 
   @Mutation(() => Boolean)
   async logout(@Ctx() { res }: MyContext) {
-    console.log("logout called");
     res.cookie("token", "", { httpOnly: true, maxAge: 1 });
     return true;
   }
