@@ -82,6 +82,8 @@ class BlogResolver {
         createBlogInput.image = image;
       }
 
+      let blogR;
+
       if (createBlogInput.id) {
         const blog = await Blog.findOneOrFail(createBlogInput.id, {
           relations: ["createdBy", "club"],
@@ -110,33 +112,32 @@ class BlogResolver {
           blog.club = createBlogInput.club;
           blog.status = createBlogInput.status;
           blog.tags = createBlogInput.tags;
-          const blogUpdated = await blog.save();
-
-          if (
-            !!blogUpdated &&
-            blogUpdated.status === BlogStatus.PENDING &&
-            user.role === UserRole.USER
-          )
-            process.env.NODE_ENV === "production"
-              ? mail({
-                  toEmail: [blogUpdated.club.email, ...getAdminMails()],
-                  subject: `New Blog Created || ${blogUpdated.title}`,
-                  htmlContent: `New Blog is been created with title - ${blogUpdated.title} by ${blogUpdated.createdBy.name} with reference to ${blogUpdated.club.name}.`,
-                })
-              : console.log(
-                  blogUpdated.club.email,
-                  blogUpdated.title,
-                  blogUpdated.createdBy.name,
-                  blogUpdated.club.name
-                );
-
-          return blogUpdated;
+          blogR = await blog.save();
         } else throw new Error("Not allowed to edit");
       } else {
         createBlogInput.createdBy = user;
-        const blog = await Blog.create(createBlogInput).save();
-        return blog;
+        blogR = await Blog.create(createBlogInput).save();
       }
+
+      if (
+        !!blogR &&
+        blogR.status === BlogStatus.PENDING &&
+        user.role === UserRole.USER
+      )
+        process.env.NODE_ENV === "production"
+          ? mail({
+              toEmail: [blogR.club.email, ...getAdminMails()],
+              subject: `New Blog Created || ${blogR.title}`,
+              htmlContent: `New Blog is been created with title - ${blogR.title} by ${blogR.createdBy.name} with reference to ${blogR.club.name}.`,
+            })
+          : console.log(
+              blogR.club.email,
+              blogR.title,
+              blogR.createdBy.name,
+              blogR.club.name
+            );
+
+      return blogR;
     } catch (e) {
       throw new Error(e);
     }
