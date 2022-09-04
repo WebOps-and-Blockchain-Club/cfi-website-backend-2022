@@ -138,6 +138,7 @@ type Mutation {
   createComment(CreateCommentInput: CreateCommentInput!): Comment!
   createProject(CreateProjectInput: CreateProjectInput!): Project!
   createTag(CreateTagInput: CreateTagInput!): Boolean!
+  createTags(CreateTagsInput: [CreateTagInput!]!): Boolean!
   deleteAllProjects(ProjectId: String!): Boolean!
   deleteComment(CommentId: String!): Boolean!
   editTag(EditTagInput: EditTagInput!, TagId: String!): Boolean!

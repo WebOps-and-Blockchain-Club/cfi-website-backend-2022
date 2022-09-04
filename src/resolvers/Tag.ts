@@ -20,11 +20,26 @@ import { filterBlogWithRole } from "../utils/blogFilter";
 
 @Resolver((_type) => Tag)
 class TagResolver {
-  // @Authorized([UserRole.ADMIN])
+  @Authorized([UserRole.ADMIN])
   @Mutation(() => Boolean)
   async createTag(@Arg("CreateTagInput") createTagInput: CreateTagInput) {
     try {
       const tag = await Tag.create(createTagInput).save();
+      return !!tag;
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  @Authorized([UserRole.ADMIN])
+  @Mutation(() => Boolean)
+  async createTags(
+    @Arg("CreateTagsInput", () => [CreateTagInput])
+    createTagsInput: CreateTagInput[]
+  ) {
+    try {
+      const tags = Tag.create(createTagsInput);
+      const tag = await Tag.save(tags);
       return !!tag;
     } catch (e) {
       throw new Error(e);
