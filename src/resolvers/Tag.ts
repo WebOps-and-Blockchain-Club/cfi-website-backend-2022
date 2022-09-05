@@ -10,7 +10,11 @@ import {
 } from "type-graphql";
 import Blog from "../entities/Blog";
 import Tag from "../entities/Tag";
-import { CreateTagInput, EditTagInput } from "../types/inputs/Tag";
+import {
+  CreateTagInput,
+  CreateTagsInput,
+  EditTagInput,
+} from "../types/inputs/Tag";
 import { FilterBlog } from "../types/inputs/Blog";
 import { Pagination } from "../types/inputs/Shared";
 import { GetBlogsOutput } from "../types/objects/Blog";
@@ -20,11 +24,32 @@ import { filterBlogWithRole } from "../utils/blogFilter";
 
 @Resolver((_type) => Tag)
 class TagResolver {
-  // @Authorized([UserRole.ADMIN])
+  @Authorized([UserRole.ADMIN])
   @Mutation(() => Boolean)
   async createTag(@Arg("CreateTagInput") createTagInput: CreateTagInput) {
     try {
       const tag = await Tag.create(createTagInput).save();
+      return !!tag;
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  @Authorized([UserRole.ADMIN])
+  @Mutation(() => Boolean)
+  async createTags(
+    @Arg("CreateTagsInput")
+    createTagsInput: CreateTagsInput
+  ) {
+    try {
+      let tagsModel: CreateTagInput[] = [];
+      createTagsInput.names.map((_tag) => {
+        let _tagModel = new CreateTagInput();
+        _tagModel.name = _tag;
+        tagsModel.push(_tagModel);
+      });
+      const tags = Tag.create(tagsModel);
+      const tag = await Tag.save(tags);
       return !!tag;
     } catch (e) {
       throw new Error(e);

@@ -7,9 +7,15 @@ class CreateTagInput {
 }
 
 @InputType()
+class CreateTagsInput {
+  @Field(() => [String])
+  names: string[];
+}
+
+@InputType()
 class EditTagInput {
   @Field({ nullable: true })
   name?: string;
 }
 
-export { CreateTagInput, EditTagInput };
+export { CreateTagInput, CreateTagsInput, EditTagInput };
