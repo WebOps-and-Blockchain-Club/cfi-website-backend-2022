@@ -39,7 +39,7 @@ export const mail = async ({
         service: "gmail",
         auth: {
           type: "OAuth2",
-          user: "instispace_cfi@smail.iitm.ac.in",
+          user: USER,
           clientId: CLIENT_ID,
           clientSecret: CLIENT_SECRET,
           refreshToken: REFRESH_TOKEN,
