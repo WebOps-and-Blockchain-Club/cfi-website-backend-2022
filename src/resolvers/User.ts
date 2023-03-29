@@ -36,7 +36,7 @@ class UserResolver {
       });
 
       const { name, email } = ticket.getPayload()!;
-      if (!name || !email) throw new Error("Google Login Falid");
+      if (!name || !email) throw new Error("Google Login Failed");
 
       // Get the `user` details from database
       let user = await User.findOne({ email });
@@ -72,8 +72,10 @@ class UserResolver {
       if (
         loginType === LoginType.SIP &&
         !RoleConstraints.SIP.includes(user.role)
-      )
+      ) {
+        console.log("from sip")
         throw new Error("Invalid User");
+      }
       if (
         loginType === LoginType.BLOG &&
         !RoleConstraints.Blog.includes(user.role)

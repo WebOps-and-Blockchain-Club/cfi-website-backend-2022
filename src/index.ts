@@ -65,6 +65,7 @@ const main = async () => {
         "http://localhost:3000",
         "https://studio.apollographql.com",
         "https://cfi.iitm.ac.in",
+        "http://localhost:8000",
       ],
     })
   );
