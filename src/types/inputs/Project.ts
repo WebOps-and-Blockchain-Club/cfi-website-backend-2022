@@ -29,6 +29,9 @@ class CreateProjectInput {
   @Field(() => [String])
   clubIds: String[];
 
+  @Field()
+  contact: string;
+
   clubs: Club[];
   createdBy?: User;
 }
