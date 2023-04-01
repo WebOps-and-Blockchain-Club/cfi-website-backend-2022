@@ -48,6 +48,7 @@ class ProjectResolver {
           project.q4 = createProjectInput.q4;
           project.clubs = createProjectInput.clubs;
           project.status = createProjectInput.status;
+          project.contact = createProjectInput.contact;
           const projectUpdated = await project.save();
           return projectUpdated;
         } else throw new Error("Unauthorised");

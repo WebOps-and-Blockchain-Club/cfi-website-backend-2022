@@ -68,6 +68,7 @@ input CreateCommentInput {
 
 input CreateProjectInput {
   clubIds: [String!]!
+  contact: String!
   id: String
   q1: String
   q2: String
@@ -163,6 +164,7 @@ input Pagination {
 type Project {
   clubs: [Club!]!
   comments: [Comment!]!
+  contact: String!
   createdBy: User!
   id: String!
   isLiked: Boolean!

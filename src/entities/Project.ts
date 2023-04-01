@@ -60,6 +60,10 @@ class Project extends BaseEntity {
   @JoinTable()
   clubs: Club[];
 
+  @Column()
+  @Field()
+  contact: string;
+
   @UpdateDateColumn({ type: "timestamptz" })
   @Field(() => Date)
   updatedAt: Date;
