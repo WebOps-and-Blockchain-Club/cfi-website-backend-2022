@@ -12,6 +12,7 @@ import Project from "./Project";
 import Comment from "./Comment";
 import { UserRole } from "../utils";
 import Image from "./Image";
+import Club from "./Club";
 
 registerEnumType(UserRole, { name: "UserRole" });
 
@@ -42,6 +43,9 @@ class User extends BaseEntity {
 
   @ManyToMany(() => Project, (project) => project.createdBy, { nullable: true })
   likedProjects: Project[];
+
+  @ManyToMany(() => Club, (club) => club.users, { nullable: true })
+  clubs: Club[];
 
   @OneToMany(() => Image, (image) => image.createdBy, { nullable: true })
   images: Image[];

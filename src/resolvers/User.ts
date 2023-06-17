@@ -101,6 +101,36 @@ class UserResolver {
     return user;
   }
 
+  @Mutation(() => User)
+  async addCLubs(
+    @Ctx() { user }: MyContext,
+    @Arg("clubIds", () => [String]) clubIds: string[]
+  ) {
+    let newUser = await User.findOne({
+      where: { id: user.id },
+      relations: ["clubs"],
+    });
+    var clubs: Club[] = [];
+
+    if (clubIds) {
+      await Promise.all(
+        clubIds.map(async (id) => {
+          const club = await Club.findOne({
+            where: { id: id },
+            relations: ["users"],
+          });
+          if (club) {
+            clubs = clubs.concat(club);
+          }
+        })
+      );
+      if (clubIds.length != clubs.length) throw new Error("Invalid tagIds");
+    }
+    newUser!.clubs = clubs;
+    let updatedUser = await newUser?.save();
+    return updatedUser;
+  }
+
   @Mutation(() => Boolean)
   async logout(@Ctx() { res }: MyContext) {
     res.cookie("token", "", { httpOnly: true, maxAge: 1 });
