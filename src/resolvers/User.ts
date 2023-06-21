@@ -13,7 +13,7 @@ import { OAuth2Client } from "google-auth-library";
 
 import User from "../entities/User";
 import Blog from "../entities/Blog";
-import { LoginInput } from "../types/inputs/User";
+import { AddCLubsInput, LoginInput } from "../types/inputs/User";
 import { emailRoleList, LoginType, RoleConstraints, UserRole } from "../utils";
 import MyContext from "../utils/context";
 import Project from "../entities/Project";
@@ -45,7 +45,6 @@ class UserResolver {
       if (!user) {
         // Assigning `role`
         let role;
-        console.log(emailRoleList);
         const emailList = emailRoleList.filter(
           (item) => item.email === email
         )[0];
@@ -58,6 +57,8 @@ class UserResolver {
         else if (clubs.length) role = UserRole.MEMBER;
         // For smail, `USER`
         else if (email.includes("@smail.iitm.ac.in")) role = UserRole.USER;
+        //For summer school
+        else if (loginType == LoginType.SUMMERSCHOOL) role = UserRole.USER;
         else throw new Error("Invalid User");
 
         // Store in database
@@ -84,6 +85,11 @@ class UserResolver {
         !RoleConstraints.Admin.includes(user.role)
       )
         throw new Error("Invalid User");
+      if (
+        loginType === LoginType.SUMMERSCHOOL &&
+        !RoleConstraints.SummerSchool.includes(user.role)
+      )
+        throw new Error("Invalid User");
 
       const jwtToken = jwt.sign(user.id, process.env.JWT_SECRET!);
 
@@ -104,13 +110,17 @@ class UserResolver {
   @Mutation(() => User)
   async addCLubs(
     @Ctx() { user }: MyContext,
-    @Arg("clubIds", () => [String]) clubIds: string[]
+    @Arg("addClubsInput") addClubsInput: AddCLubsInput
   ) {
+    console.log(addClubsInput);
+
+    const { name, clubIds, contact, slots } = addClubsInput;
     let newUser = await User.findOne({
       where: { id: user.id },
       relations: ["clubs"],
     });
-    var clubs: Club[] = [];
+    if (!newUser) throw new Error("Invalid User");
+    var clubs: Club[] = newUser!.clubs;
 
     if (clubIds) {
       await Promise.all(
@@ -121,12 +131,15 @@ class UserResolver {
           });
           if (club) {
             clubs = clubs.concat(club);
-          }
+          } else throw new Error("Invalid Session");
         })
       );
-      if (clubIds.length != clubs.length) throw new Error("Invalid tagIds");
     }
     newUser!.clubs = clubs;
+    newUser!.name = name;
+    newUser!.slots = slots;
+    newUser!.contact = contact;
+
     let updatedUser = await newUser?.save();
     return updatedUser;
   }

@@ -12,12 +12,14 @@ export enum LoginType {
   SIP = "SIP",
   BLOG = "BLOG",
   ADMIN = "ADMIN",
+  SUMMERSCHOOL = "SUMMERSCHOOL",
 }
 
 export const RoleConstraints = {
   SIP: [UserRole.USER],
   Blog: [UserRole.USER],
   Admin: [UserRole.ADMIN, UserRole.DEV, UserRole.MEMBER],
+  SummerSchool: [UserRole.USER],
 };
 
 export enum BlogStatus {

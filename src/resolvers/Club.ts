@@ -42,7 +42,7 @@ class ClubResolver {
   @Query(() => [Club])
   async getClubs() {
     try {
-      return await Club.find({ order: { name: "ASC" } });
+      return await Club.find({ order: { name: "ASC" }, relations: ["users"] });
     } catch (e) {
       throw new Error(e);
     }

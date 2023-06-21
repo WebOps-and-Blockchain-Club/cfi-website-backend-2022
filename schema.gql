@@ -3,6 +3,13 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+input AddCLubsInput {
+  clubIds: [String!]!
+  contact: String!
+  name: String!
+  slots: String!
+}
+
 type Blog {
   author: String
   club: Club
@@ -33,6 +40,8 @@ type Club {
   id: String!
   name: String!
   projects: [Project!]!
+  slot: String
+  users: [User!]
 }
 
 type Comment {
@@ -135,9 +144,12 @@ enum LoginType {
   ADMIN
   BLOG
   SIP
+  SUMMERSCHOOL
 }
 
 type Mutation {
+  addCLubs(addClubsInput: AddCLubsInput!): User!
+  addSlot(clubId: String!, slot: String!): Club!
   createBlog(CreateBlogInput: CreateBlogInput!): Blog!
   createClub(CreateClubInput: CreateClubInput!): Boolean!
   createComment(CreateCommentInput: CreateCommentInput!): Comment!
@@ -206,11 +218,14 @@ scalar Upload
 
 type User {
   blogs: [Blog!]
+  clubs: [Club!]
+  contact: String
   email: String!
   id: String!
   name: String!
   projects: [Project!]
   role: UserRole!
+  slots: String
 }
 
 enum UserRole {

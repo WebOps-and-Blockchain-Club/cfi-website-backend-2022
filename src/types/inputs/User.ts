@@ -11,4 +11,19 @@ class LoginInput {
   @Field(() => LoginType)
   loginType: LoginType;
 }
-export { LoginInput };
+
+@InputType()
+class AddCLubsInput {
+  @Field()
+  name: string;
+
+  @Field(() => [String])
+  clubIds: string[];
+
+  @Field()
+  contact: string;
+
+  @Field()
+  slots: string;
+}
+export { LoginInput, AddCLubsInput };

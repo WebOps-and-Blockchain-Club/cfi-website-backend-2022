@@ -4,6 +4,7 @@ import {
   BeforeInsert,
   Column,
   Entity,
+  JoinTable,
   ManyToMany,
   OneToMany,
   PrimaryColumn,
@@ -39,7 +40,9 @@ class Club extends BaseEntity {
   @ManyToMany(() => Project, (projects) => projects.clubs, { nullable: true })
   projects: Project[];
 
+  @JoinTable()
   @ManyToMany(() => User, (user) => user.clubs, { nullable: true })
+  @Field(() => [User], { nullable: true })
   users: User[];
 
   @OneToMany(() => Blog, (blogs) => blogs.club, { nullable: true })

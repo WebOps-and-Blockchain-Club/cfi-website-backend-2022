@@ -36,7 +36,7 @@ const main = async () => {
       if (token) {
         try {
           const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
-          user = await User.findOne({ id: decoded });
+          user = await User.findOne({ id: decoded }, { relations: ["clubs"] });
         } catch (e) {
           console.log(e);
         }

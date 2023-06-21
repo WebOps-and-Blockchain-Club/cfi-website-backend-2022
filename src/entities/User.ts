@@ -35,6 +35,14 @@ class User extends BaseEntity {
   @Field(() => UserRole)
   role: UserRole;
 
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  contact: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  slots: string;
+
   @OneToMany(() => Blog, (blog) => blog.createdBy, { nullable: true })
   blogs: Blog[];
 
@@ -45,6 +53,7 @@ class User extends BaseEntity {
   likedProjects: Project[];
 
   @ManyToMany(() => Club, (club) => club.users, { nullable: true })
+  @Field(() => [Club], { nullable: true })
   clubs: Club[];
 
   @OneToMany(() => Image, (image) => image.createdBy, { nullable: true })
