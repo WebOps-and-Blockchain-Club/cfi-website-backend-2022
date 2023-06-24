@@ -112,9 +112,7 @@ class UserResolver {
     @Ctx() { user }: MyContext,
     @Arg("addClubsInput") addClubsInput: AddCLubsInput
   ) {
-    console.log(addClubsInput);
-
-    const { name, clubIds, contact, slots } = addClubsInput;
+    const { name, clubIds, contact, smail, slots } = addClubsInput;
     let newUser = await User.findOne({
       where: { id: user.id },
       relations: ["clubs"],
@@ -126,21 +124,28 @@ class UserResolver {
       await Promise.all(
         clubIds.map(async (id) => {
           const club = await Club.findOne({
-            where: { id: id },
+            where: { id },
             relations: ["users"],
           });
+
           if (club) {
             clubs = clubs.concat(club);
-          } else throw new Error("Invalid Session");
+          } else {
+            throw new Error("Invalid Session");
+          }
         })
       );
     }
+    console.log(newUser.name);
+    console.log(clubs);
     newUser!.clubs = clubs;
     newUser!.name = name;
     newUser!.slots = slots;
     newUser!.contact = contact;
+    if (smail) newUser!.smail = smail;
 
     let updatedUser = await newUser?.save();
+    console.log("done");
     return updatedUser;
   }
 

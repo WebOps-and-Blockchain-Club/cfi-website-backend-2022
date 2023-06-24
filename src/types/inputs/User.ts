@@ -24,6 +24,9 @@ class AddCLubsInput {
   contact: string;
 
   @Field()
+  smail?: string;
+
+  @Field()
   slots: string;
 }
 export { LoginInput, AddCLubsInput };

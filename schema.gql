@@ -8,6 +8,7 @@ input AddCLubsInput {
   contact: String!
   name: String!
   slots: String!
+  smail: String!
 }
 
 type Blog {
@@ -226,6 +227,7 @@ type User {
   projects: [Project!]
   role: UserRole!
   slots: String
+  smail: String
 }
 
 enum UserRole {

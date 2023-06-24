@@ -43,6 +43,10 @@ class User extends BaseEntity {
   @Field({ nullable: true })
   slots: string;
 
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  smail: string;
+
   @OneToMany(() => Blog, (blog) => blog.createdBy, { nullable: true })
   blogs: Blog[];
 
