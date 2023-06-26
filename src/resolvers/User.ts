@@ -13,7 +13,7 @@ import { OAuth2Client } from "google-auth-library";
 
 import User from "../entities/User";
 import Blog from "../entities/Blog";
-import { AddCLubsInput, LoginInput } from "../types/inputs/User";
+import { AddCLubsInput, DereristerInp, LoginInput } from "../types/inputs/User";
 import { emailRoleList, LoginType, RoleConstraints, UserRole } from "../utils";
 import MyContext from "../utils/context";
 import Project from "../entities/Project";
@@ -113,6 +113,8 @@ class UserResolver {
     @Arg("addClubsInput") addClubsInput: AddCLubsInput
   ) {
     const { name, clubIds, contact, smail, slots } = addClubsInput;
+
+    console.log(addClubsInput);
     let newUser = await User.findOne({
       where: { id: user.id },
       relations: ["clubs"],
@@ -127,7 +129,6 @@ class UserResolver {
             where: { id },
             relations: ["users"],
           });
-
           if (club) {
             clubs = clubs.concat(club);
           } else {
@@ -136,17 +137,68 @@ class UserResolver {
         })
       );
     }
-    console.log(newUser.name);
-    console.log(clubs);
+
     newUser!.clubs = clubs;
     newUser!.name = name;
-    newUser!.slots = slots;
+    newUser!.slots = newUser.slots + " " + slots;
     newUser!.contact = contact;
     if (smail) newUser!.smail = smail;
 
     let updatedUser = await newUser?.save();
     console.log("done");
     return updatedUser;
+  }
+
+  @Mutation(() => Boolean)
+  async deregister(
+    @Ctx() { user }: MyContext,
+    @Arg("dereristerInp") dereristerInp: DereristerInp
+  ) {
+    const { clubIds, slot } = dereristerInp;
+
+    try {
+      let newUser = await User.findOne({
+        where: { id: user.id },
+        relations: ["clubs"],
+      });
+
+      if (!newUser) throw new Error("Invalid User");
+      let clubs = newUser!.clubs;
+      if (clubIds) {
+        await Promise.all(
+          clubIds.map(async (id) => {
+            const club = await Club.findOne({
+              where: { id },
+              relations: ["users"],
+            });
+            if (
+              club &&
+              (!["F1", "F2"].includes(slot) ||
+                (newUser!.slots.includes("F1") &&
+                  !newUser!.slots.includes("F2") &&
+                  slot == "F1") ||
+                (newUser!.slots.includes("F2") &&
+                  !newUser!.slots.includes("F1") &&
+                  slot == "F2"))
+            ) {
+              clubs = clubs.filter((e) => e.id != club.id);
+            }
+          })
+        );
+      }
+
+      newUser.clubs = clubs;
+      let slots = newUser.slots;
+      newUser.slots = slots
+        .split(" ")
+        .filter((e) => e != slot)
+        .join(" ");
+      await newUser.save();
+      return true;
+    } catch (error) {
+      console.log(error);
+      throw new Error("Unsuccessful");
+    }
   }
 
   @Mutation(() => Boolean)

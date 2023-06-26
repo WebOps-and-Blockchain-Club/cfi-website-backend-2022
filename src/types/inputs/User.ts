@@ -29,4 +29,13 @@ class AddCLubsInput {
   @Field()
   slots: string;
 }
-export { LoginInput, AddCLubsInput };
+
+@InputType()
+class DereristerInp {
+  @Field(() => [String])
+  clubIds: string[];
+
+  @Field()
+  slot: string;
+}
+export { LoginInput, AddCLubsInput, DereristerInp };

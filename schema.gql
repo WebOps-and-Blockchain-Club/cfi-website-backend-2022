@@ -101,6 +101,11 @@ The javascript `Date` as string. Type represents date and time as the ISO Date s
 """
 scalar DateTime
 
+input DereristerInp {
+  clubIds: [String!]!
+  slot: String!
+}
+
 input EditTagInput {
   name: String
 }
@@ -159,6 +164,7 @@ type Mutation {
   createTags(CreateTagsInput: CreateTagsInput!): Boolean!
   deleteAllProjects(ProjectId: String!): Boolean!
   deleteComment(CommentId: String!): Boolean!
+  deregister(dereristerInp: DereristerInp!): Boolean!
   editTag(EditTagInput: EditTagInput!, TagId: String!): Boolean!
   login(LoginInputs: LoginInput!): User!
   logout: Boolean!
