@@ -210,6 +210,8 @@ type Query {
   getMe: User!
   getProject(ProjectId: String!): Project
   getProjects(Filters: FilterProject, Pagination: Pagination): GetProjectsOutput!
+  getRegisteredUsers(slot: String!): [User!]!
+  getRegistrationCount: Float!
   getTag(TagId: String, TagName: String): Tag
   getTags: [Tag!]
 }

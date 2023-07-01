@@ -50,7 +50,6 @@ class UserResolver {
         )[0];
 
         const clubs = await Club.find({ where: { email } });
-
         // For `ADMIN`, `DEV`
         if (emailList) role = emailList.role;
         // For `MEMBER`
@@ -113,8 +112,6 @@ class UserResolver {
     @Arg("addClubsInput") addClubsInput: AddCLubsInput
   ) {
     const { name, clubIds, contact, smail, slots } = addClubsInput;
-
-    console.log(addClubsInput);
     let newUser = await User.findOne({
       where: { id: user.id },
       relations: ["clubs"],
@@ -145,7 +142,6 @@ class UserResolver {
     if (smail) newUser!.smail = smail;
 
     let updatedUser = await newUser?.save();
-    console.log("done");
     return updatedUser;
   }
 
@@ -155,7 +151,7 @@ class UserResolver {
     @Arg("dereristerInp") dereristerInp: DereristerInp
   ) {
     const { clubIds, slot } = dereristerInp;
-
+    console.log(clubIds, slot);
     try {
       let newUser = await User.findOne({
         where: { id: user.id },
@@ -188,11 +184,13 @@ class UserResolver {
       }
 
       newUser.clubs = clubs;
+      console.log(newUser.clubs);
       let slots = newUser.slots;
       newUser.slots = slots
         .split(" ")
         .filter((e) => e != slot)
         .join(" ");
+      console.log(newUser.slots);
       await newUser.save();
       return true;
     } catch (error) {
