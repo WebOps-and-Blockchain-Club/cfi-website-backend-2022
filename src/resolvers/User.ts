@@ -111,7 +111,7 @@ class UserResolver {
     @Ctx() { user }: MyContext,
     @Arg("addClubsInput") addClubsInput: AddCLubsInput
   ) {
-    const { name, clubIds, contact, smail, slots } = addClubsInput;
+    const { name, clubIds, contact, smail, slots, college } = addClubsInput;
     let newUser = await User.findOne({
       where: { id: user.id },
       relations: ["clubs"],
@@ -139,6 +139,7 @@ class UserResolver {
     newUser!.name = name;
     newUser!.slots = newUser.slots + " " + slots;
     newUser!.contact = contact;
+    newUser!.college = college;
     if (smail) newUser!.smail = smail;
 
     let updatedUser = await newUser?.save();

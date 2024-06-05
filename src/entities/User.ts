@@ -41,6 +41,10 @@ class User extends BaseEntity {
 
   @Column({ nullable: true })
   @Field({ nullable: true })
+  college: string;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
   slots: string;
 
   @Column({ nullable: true })

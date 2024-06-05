@@ -28,6 +28,9 @@ class AddCLubsInput {
 
   @Field()
   slots: string;
+
+  @Field()
+  college: string;
 }
 
 @InputType()
