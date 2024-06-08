@@ -111,41 +111,47 @@ class UserResolver {
     @Ctx() { user }: MyContext,
     @Arg("addClubsInput") addClubsInput: AddCLubsInput
   ) {
-    const { name, clubIds, contact, smail, slots, college } = addClubsInput;
-    let newUser = await User.findOne({
-      where: { id: user.id },
-      relations: ["clubs"],
-    });
-    if (!newUser) throw new Error("Invalid User");
-    var clubs: Club[] = newUser!.clubs;
-    if (clubIds.length > 4) throw new Error("Cannot register for more than 4 clubs");
+    try {
 
-    if (clubIds) {
-      await Promise.all(
-        clubIds.map(async (id) => {
-          const club = await Club.findOne({
-            where: { id },
-            relations: ["users"],
-          });
-          if (club) {
-            clubs = clubs.concat(club);
-          } else {
-            throw new Error("Invalid Session");
-          }
-        })
-      );
+
+      const { name, clubIds, contact, smail, slots, college } = addClubsInput;
+      let newUser = await User.findOne({
+        where: { id: user.id },
+        relations: ["clubs"],
+      });
+      if (!newUser) throw new Error("Invalid User");
+      var clubs: Club[] = newUser!.clubs;
+      if (clubIds.length > 4) throw new Error("Cannot register for more than 4 clubs");
+
+      if (clubIds) {
+        await Promise.all(
+          clubIds.map(async (id) => {
+            const club = await Club.findOne({
+              where: { id },
+              relations: ["users"],
+            });
+            if (club) {
+              clubs = clubs.concat(club);
+            } else {
+              throw new Error("Invalid Session");
+            }
+          })
+        );
+      }
+      if (newUser!.clubs.length + clubIds.length > 4) throw new Error("Cannot register for more than 4 clubs");
+
+      newUser!.clubs = clubs;
+      newUser!.name = name;
+      newUser!.slots = newUser.slots + " " + slots;
+      newUser!.contact = contact;
+      newUser!.college = college;
+      if (smail) newUser!.smail = smail;
+
+      let updatedUser = await newUser?.save();
+      return updatedUser;
+    } catch (error) {
+      console.log(error);
     }
-    if (newUser!.clubs.length + clubIds.length > 4) throw new Error("Cannot register for more than 4 clubs");
-
-    newUser!.clubs = clubs;
-    newUser!.name = name;
-    newUser!.slots = newUser.slots + " " + slots;
-    newUser!.contact = contact;
-    newUser!.college = college;
-    if (smail) newUser!.smail = smail;
-
-    let updatedUser = await newUser?.save();
-    return updatedUser;
   }
 
   @Mutation(() => Boolean)
