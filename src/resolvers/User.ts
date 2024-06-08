@@ -151,6 +151,7 @@ class UserResolver {
       return updatedUser;
     } catch (error) {
       console.log(error);
+      return error;
     }
   }
 
