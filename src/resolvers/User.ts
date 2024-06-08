@@ -112,6 +112,7 @@ class UserResolver {
     @Arg("addClubsInput") addClubsInput: AddCLubsInput
   ) {
     try {
+      console.log(addClubsInput);
 
 
       const { name, clubIds, contact, smail, slots, college } = addClubsInput;
@@ -121,7 +122,7 @@ class UserResolver {
       });
       if (!newUser) throw new Error("Invalid User");
       var clubs: Club[] = newUser!.clubs;
-      if (clubIds.length > 4) throw new Error("Cannot register for more than 4 clubs");
+      if (clubIds.length > 4) throw new Error(`Cannot register for more than 4 clubs clubIds--- ${clubIds} `);
 
       if (clubIds) {
         await Promise.all(
@@ -138,7 +139,7 @@ class UserResolver {
           })
         );
       }
-      if (newUser!.clubs.length + clubIds.length > 4) throw new Error("Cannot register for more than 4 clubs");
+      if (newUser!.clubs.length + clubIds.length > 4) throw new Error(`Cannot register for more than 4 clubs ${newUser!.clubs.length} ${clubIds.length}`);
 
       newUser!.clubs = clubs;
       newUser!.name = name;
